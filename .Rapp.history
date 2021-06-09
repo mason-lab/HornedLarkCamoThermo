@@ -1,0 +1,3559 @@
+### Plotting colors ####
+show(load("~/Desktop/Manuscripts/LarkPhenoEnv/Figures/hola_col_plot_df.Rd"))#
+col_plot_df#
+#
+### Read in voucher data ####
+vouchers<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Data/VoucherTable_v4.xlsx",sheetName="Sheet1",stringsAsFactors=F)#
+rownames(vouchers)<-paste("MVZ",vouchers$catalognumber,sep="")#
+head(vouchers)#
+nrow(vouchers)#
+#
+length(table(vouchers$infra))#
+#
+### Read in pavo plumage data ####
+back_light_df<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_PavoColorData_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in plumage pattern data ####
+pattern<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BackPattern_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(pattern)){#
+	pattern[,i]<-as.numeric(pattern[,i])#
+}#
+#
+### Read in FullSpectrumData Set ####
+hola_ir_dorsal<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+hola_ir_ventral<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Ventral_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in abiotic data ####
+bio_data<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BioClim_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(bio_data)){#
+	bio_data[,i]<-as.numeric(bio_data[,i])#
+}#
+#
+### PCA on bioclim ####
+bio_pca<-princomp(bio_data)#
+bio_pca$scores[,1]<-bio_pca$scores[,1]*-1#
+#
+### write out supplementary table with bioclim PCA loadings ####
+write.xlsx(bio_pca$loadings[,1:3],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/BioClimPCALoadings.xlsx")#
+#
+colnames(vouchers)#
+data4eric<-data.frame(vouchers[rownames(bio_pca$scores),],bio_data,bio_pca$scores[,1:3])#
+write.xlsx(data4eric,file="/Users/NickMason/Desktop/HOLA_ClimateData_08May2020.xlsx")#
+#
+### Read in soil composition data ####
+soil_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilComposition_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_pca<-princomp(soil_df)#
+soil_pca$loadings#
+#
+### Read in soil color data ####
+soil_col_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilColor_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_col_pca<-princomp(na.omit(soil_col_df[,1:3]))#
+nrow(soil_col_pca$scores)#
+write.xlsx(soil_col_pca$loadings[,1:2],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilColorLoadings_v1.xlsx")#
+#
+soil_color_rgb<-apply(na.omit(soil_col_df),1,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))#
+#
+# For Full (Outer) Join#
+multi_full <- Reduce(#
+  function(x, y, ...) merge(x, y, all = TRUE, ...),#
+ test#
+)#
+#
+### Read in colors ####
+source('~/Programming/R/c25_palette.R', chdir = TRUE)#
+c25#
+#
+######################
+### DATA ANALYSIS ####
+######################
+### Set up plotting factor and colors from darkest to lightest ####
+factor_df<-data.frame(ssp=vouchers$infra,hola_ir_dorsal)#
+avg_ref<-tapply(factor_df$dorsal_solar_reflectance, factor_df$ssp,mean)#
+#
+vouchers$infra<-factor(vouchers$infra,levels=names(sort(avg_ref)))#
+ssp_fact<-vouchers$infra#
+names(ssp_fact)<-rownames(vouchers)#
+#
+### Three-panel plot figure of background matching ####
+png(width=6.5,height=2.25,file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/BackgroundMatchingPlot_v5.png",units="in",res=500)#
+quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)#
+#
+dev.off()
+col_plot_df
+show(load("~/Desktop/Manuscripts/LarkPhenoEnv/Figures/hola_col_plot_df.Rd"))#
+col_plot_df#
+#
+### Read in voucher data ####
+vouchers<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Data/VoucherTable_v4.xlsx",sheetName="Sheet1",stringsAsFactors=F)#
+rownames(vouchers)<-paste("MVZ",vouchers$catalognumber,sep="")#
+head(vouchers)#
+nrow(vouchers)#
+#
+length(table(vouchers$infra))#
+#
+### Read in pavo plumage data ####
+back_light_df<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_PavoColorData_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in plumage pattern data ####
+pattern<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BackPattern_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(pattern)){#
+	pattern[,i]<-as.numeric(pattern[,i])#
+}#
+#
+### Read in FullSpectrumData Set ####
+hola_ir_dorsal<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+hola_ir_ventral<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Ventral_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in abiotic data ####
+bio_data<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BioClim_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(bio_data)){#
+	bio_data[,i]<-as.numeric(bio_data[,i])#
+}#
+#
+### PCA on bioclim ####
+bio_pca<-princomp(bio_data)#
+bio_pca$scores[,1]<-bio_pca$scores[,1]*-1#
+#
+### write out supplementary table with bioclim PCA loadings ####
+write.xlsx(bio_pca$loadings[,1:3],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/BioClimPCALoadings.xlsx")#
+#
+colnames(vouchers)#
+data4eric<-data.frame(vouchers[rownames(bio_pca$scores),],bio_data,bio_pca$scores[,1:3])#
+write.xlsx(data4eric,file="/Users/NickMason/Desktop/HOLA_ClimateData_08May2020.xlsx")#
+#
+### Read in soil composition data ####
+soil_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilComposition_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_pca<-princomp(soil_df)#
+soil_pca$loadings#
+#
+### Read in soil color data ####
+soil_col_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilColor_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_col_pca<-princomp(na.omit(soil_col_df[,1:3]))#
+nrow(soil_col_pca$scores)#
+write.xlsx(soil_col_pca$loadings[,1:2],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilColorLoadings_v1.xlsx")#
+#
+soil_color_rgb<-apply(na.omit(soil_col_df),1,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))#
+#
+# For Full (Outer) Join#
+multi_full <- Reduce(#
+  function(x, y, ...) merge(x, y, all = TRUE, ...),#
+ test#
+)#
+#
+### Read in colors ####
+source('~/Programming/R/c25_palette.R', chdir = TRUE)#
+c25#
+#
+######################
+### DATA ANALYSIS ####
+######################
+### Set up plotting factor and colors from darkest to lightest ####
+factor_df<-data.frame(ssp=vouchers$infra,hola_ir_dorsal)#
+avg_ref<-tapply(factor_df$dorsal_solar_reflectance, factor_df$ssp,mean)#
+#
+vouchers$infra<-factor(vouchers$infra,levels=names(sort(avg_ref)))#
+ssp_fact<-vouchers$infra#
+names(ssp_fact)<-rownames(vouchers)
+png(width=6.5,height=2.25,file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/BackgroundMatchingPlot_v5.png",units="in",res=500)#
+#quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)#
+#
+dev.off()
+quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+### Panel A ####
+plot(hola_ir_dorsal$dorsal_solar_reflectance~ (bio_pca$scores[,1]),col=col_plot_df[as.character(ssp_fact[rownames(hola_ir_dorsal)]),1],pch=21,lwd=0.45,axes=F,xlab="",ylab="")#
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,1])#
+corner.label(paste0("r = ",round(cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,1])$estimate,2)))#
+abline(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,1]))#
+#
+box()#
+#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Seasonality (PC1)",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Dorsal Solar Reflectance",side=2,line=1.5,cex=0.75)#
+#
+### Panel B ####
+plot(hola_ir_dorsal$dorsal_solar_reflectance~ bio_pca$scores[,2],col=col_plot_df[as.character(ssp_fact[rownames(hola_ir_dorsal)]),1],pch=21,lwd=0.45,axes=F,xlab="",ylab="")#
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,2])#
+corner.label(paste0("r = ",round(cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,2])$estimate,2)))#
+abline(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,2]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Aridity (PC2)",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Dorsal Solar Reflectance",side=2,line=1.5,cex=0.75)#
+#
+### Panel C ####
+plot(hola_ir_dorsal$dorsal_solar_reflectance~ bio_pca$scores[,3],col=col_plot_df[as.character(ssp_fact[rownames(hola_ir_dorsal)]),1],pch=21,lwd=0.45,axes=F,xlab="",ylab="")#
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,3])#
+corner.label(paste0("r = ",round(cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,3])$estimate,2)))#
+abline(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,3]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Temperature (PC3)",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Dorsal Solar Reflectance",side=2,line=1.5,cex=0.75)
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,1])
+lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,1])
+summary(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,1]))
+lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1])
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))
+lumMean_fm<-glm(lumMean~soilbright+season+precip+temp,data=dorsal_glm_df,na.action = "na.fail")#
+sink("~/Desktop/Manuscripts/LarkPhenoEnv/Tables/dorsal_lumMean_glm.txt")#
+summary(lumMean_fm)
+## Dorsal reflectance ~ precipitation + soil color ####
+dorsal_glm_df<-na.omit(data.frame(lumMean=pattern[rownames(soil_col_pca$scores),]$lumMean,dorsal_solar_reflectance=hola_ir_dorsal[rownames(soil_col_pca$scores),]$dorsal_solar_reflectance,soilbright=soil_col_pca$scores[,1],season= bio_pca$scores[rownames(soil_col_pca$scores),1],precip=bio_pca$scores[rownames(soil_col_pca$scores),2],temp=bio_pca$scores[rownames(soil_col_pca$scores),3]))#
+#
+data.frame(scale(dorsal_glm_df))#
+#
+dorsal_fm<-glm(dorsal_solar_reflectance~soilbright+season+precip+temp,data=dorsal_glm_df,na.action = "na.fail")#
+sink("~/Desktop/Manuscripts/LarkPhenoEnv/Tables/dorsal_solar_absorptance_glm.txt")#
+summary(dorsal_fm)#
+sink()#
+#
+lumMean_fm<-glm(lumMean~soilbright+season+precip+temp,data=dorsal_glm_df,na.action = "na.fail")#
+sink("~/Desktop/Manuscripts/LarkPhenoEnv/Tables/dorsal_lumMean_glm.txt")#
+summary(lumMean_fm)
+sink()
+summary(lumMean_fm)
+sink()
+summary(lumMean_fm)
+a
+summary(dorsal_fm)
+summary(glm(dorsal_solar_reflectance~soilbright* precip+season+temp,data=dorsal_glm_df,na.action = "na.fail"))
+summary(glm(dorsal_solar_reflectance~soilbright* temp +season+precip,data=dorsal_glm_df,na.action = "na.fail"))
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,1]
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))
+summary(lm(pattern$sumPower~grain_pca$scores[,1]))
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,1]
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,2]
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,2],2)
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,1],2) #Beta#
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,2],2) #SE#
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,2],2) #Tvalue#
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,2],2) #Pvalue
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,4],2) #Pvalue
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,5],2) #Pvalue
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,4],5) #Pvalue
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,3],2) #Tvalue
+### Plumage chroma / soil redness ####
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,1],2) #Beta#
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,2],2) #SE#
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,3],2) #Tvalue#
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,4],5) #Pvalue
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,1],2) #Beta
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,1],2)
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1])$coefficients[2,4],5) #Pvalue
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,4],5) #Pvalue
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,4] #Pvalue
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,4],5) #Pvalue
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,4] #Pvalue
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,4] #Pvalue
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,1],2) #Beta#
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,2],2) #SE#
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,3],2) #Tvalue#
+summary(lm(pattern$sumPower~grain_pca$scores[,1])$coefficients[2,4] #Pvalue
+summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,4] #Pvalue
+### Plumage patterning / soil granularity ####
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,1],2) #Beta#
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,2],2) #SE#
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,3],2) #Tvalue#
+summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,4] #Pvalue
+png(width=6.5,height=2.25,file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/BackgroundMatchingPlot_v5.png",units="in",res=500)#
+#quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,soil_color_rgb[rownames(grain_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)#
+#
+dev.off()
+### Three-panel plot figure of background matching ####
+png(width=6.5,height=2.25,file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/BackgroundMatchingPlot_v5.png",units="in",res=500)#
+#quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,bg=soil_color_rgb[rownames(grain_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)#
+#
+dev.off()
+### Three-panel plot figure of background matching ####
+png(width=6.5,height=2.25,file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/BackgroundMatchingPlot_v5.png",units="in",res=500)#
+#quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#bg=soil_color_rgb[rownames(grain_pca$scores)],#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)#
+#
+dev.off()
+### Summary stats for paper ####
+### Plumage brightness / soil brightness ####
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,1],2) #Beta#
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,2],2) #SE#
+round(summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,3],2) #Tvalue#
+summary(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))$coefficients[2,4] #Pvalue#
+#
+### Plumage chroma / soil redness ####
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,1],2) #Beta#
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,2],2) #SE#
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,3],2) #Tvalue#
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,4] #Pvalue
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,4] #Pvalue
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,4] #Pvalue
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2])$coefficients[2,3],2) #Tvalue
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,3],2) #Tvalue
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,2],2) #SE
+round(summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,1],2) #Beta
+### Plumage chroma / soil redness ####
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,1] #Beta#
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,2] #SE#
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,3] #Tvalue#
+summary(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))$coefficients[2,4] #Pvalue
+### Plumage patterning / soil granularity ####
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,1],2) #Beta#
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,2],2) #SE#
+round(summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,3],2) #Tvalue#
+summary(lm(pattern$sumPower~grain_pca$scores[,1]))$coefficients[2,4] #Pvalue
+test.a
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#bg=soil_color_rgb[rownames(grain_pca$scores)],#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)
+test.a
+### Plotting colors ####
+show(load("~/Desktop/Manuscripts/LarkPhenoEnv/Figures/hola_col_plot_df.Rd"))#
+col_plot_df#
+#
+### Read in voucher data ####
+vouchers<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Data/VoucherTable_v4.xlsx",sheetName="Sheet1",stringsAsFactors=F)#
+rownames(vouchers)<-paste("MVZ",vouchers$catalognumber,sep="")#
+head(vouchers)#
+nrow(vouchers)#
+#
+length(table(vouchers$infra))#
+#
+### Read in pavo plumage data ####
+back_light_df<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_PavoColorData_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in plumage pattern data ####
+pattern<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BackPattern_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(pattern)){#
+	pattern[,i]<-as.numeric(pattern[,i])#
+}#
+#
+### Read in FullSpectrumData Set ####
+hola_ir_dorsal<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+hola_ir_ventral<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Ventral_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in abiotic data ####
+bio_data<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BioClim_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(bio_data)){#
+	bio_data[,i]<-as.numeric(bio_data[,i])#
+}#
+#
+### PCA on bioclim ####
+bio_pca<-princomp(bio_data)#
+bio_pca$scores[,1]<-bio_pca$scores[,1]*-1#
+#
+### write out supplementary table with bioclim PCA loadings ####
+write.xlsx(bio_pca$loadings[,1:3],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/BioClimPCALoadings.xlsx")#
+#
+colnames(vouchers)#
+data4eric<-data.frame(vouchers[rownames(bio_pca$scores),],bio_data,bio_pca$scores[,1:3])#
+write.xlsx(data4eric,file="/Users/NickMason/Desktop/HOLA_ClimateData_08May2020.xlsx")#
+#
+### Read in soil composition data ####
+soil_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilComposition_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_pca<-princomp(soil_df)#
+soil_pca$loadings#
+#
+### Read in soil color data ####
+soil_col_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilColor_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_col_pca<-princomp(na.omit(soil_col_df[,1:3]))#
+nrow(soil_col_pca$scores)#
+write.xlsx(soil_col_pca$loadings[,1:2],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilColorLoadings_v1.xlsx")#
+#
+soil_color_rgb<-apply(na.omit(soil_col_df),1,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))#
+#
+# For Full (Outer) Join#
+multi_full <- Reduce(#
+  function(x, y, ...) merge(x, y, all = TRUE, ...),#
+ test#
+)#
+#
+### Read in colors ####
+source('~/Programming/R/c25_palette.R', chdir = TRUE)#
+c25
+### Set up plotting factor and colors from darkest to lightest ####
+factor_df<-data.frame(ssp=vouchers$infra,hola_ir_dorsal)#
+avg_ref<-tapply(factor_df$dorsal_solar_reflectance, factor_df$ssp,mean)#
+#
+vouchers$infra<-factor(vouchers$infra,levels=names(sort(avg_ref)))#
+ssp_fact<-vouchers$infra#
+names(ssp_fact)<-rownames(vouchers)
+## Panel A Soil and plumage brightness ###
+plot(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,cex.axis=0.85,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Brightness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Plumage Brightness",side=2,line=1.5,cex=0.75)#
+#
+test_a<-cor.test(soil_col_pca$scores[,1], pattern[rownames(soil_col_pca$scores),]$lumMean)#
+corner.label(paste0("r = ",round(test_a$estimate,2)))#
+abline(lm(pattern[rownames(soil_col_pca$scores),]$lumMean~ soil_col_pca$scores[,1]))#
+#
+## Panel B Soil redness and plumage chroma ###
+plot(soil_col_pca $scores[,2], back_light_df[rownames(soil_col_pca$scores),]$r.achieved,pch=21,bg= soil_color_rgb[rownames(soil_col_pca$scores)],col=col_plot_df[as.character(ssp_fact[rownames(soil_col_pca$scores)]),1],lwd=0.45,axes=F,xlab="",ylab="")#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Redness",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Acheived Chroma",side=2,line=1.5,cex=0.75)#
+#
+test_b<-cor.test(soil_col_pca $scores[,2], as.numeric(back_light_df[rownames(soil_col_pca$scores),]$r.achieved))#
+corner.label(paste0("r = ",round(test_b$estimate,2)),cex=0.5)#
+abline(lm(back_light_df[rownames(soil_col_pca$scores),]$r.achieved~ soil_col_pca$scores[,2]))#
+#
+## Panel C Soil granularity and back patterning ###
+colnames(soil_df)#
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])#
+write.xlsx(round(grain_pca$loadings[,1:2],2),file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilGranularityLoadings_v1.xlsx")#
+#
+plot(grain_pca$scores[,1],pattern$sumPower,pch=21,lwd=0.45,col=col_plot_df[as.character(ssp_fact[rownames(grain_pca$scores)]),1],axes=F)#bg=soil_color_rgb[rownames(grain_pca$scores)],#
+#
+test_c<-cor.test(grain_pca$scores[,1],pattern$sumPower)#
+corner.label(paste0("r = ",round(test_c$estimate,2)),cex=0.5)#
+abline(lm(pattern$sumPower~grain_pca$scores[,1]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Soil Granularity",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Back Patterning",side=2,line=1.5,cex=0.75)
+test.a
+test_a
+test_b
+test_c
+summary(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,1]))
+### Dorsal reflectance ~ precipitation + soil color ####
+dorsal_glm_df<-na.omit(data.frame(lumMean=pattern[rownames(soil_col_pca$scores),]$lumMean,dorsal_solar_reflectance=hola_ir_dorsal[rownames(soil_col_pca$scores),]$dorsal_solar_reflectance,soilbright=soil_col_pca$scores[,1],season= bio_pca$scores[rownames(soil_col_pca$scores),1],precip=bio_pca$scores[rownames(soil_col_pca$scores),2],temp=bio_pca$scores[rownames(soil_col_pca$scores),3]))
+summary(dorsal_fm)$coefficients
+summary(lumMean_fm)$coefficients
+summary(lumMean_fm)
+summary(dorsal_fm)
+summary(lumMean_fm)$coefficients
+summary(dorsal_fm)
+summary(dorsal_fm)$coefficients
+bio_pca$loadings
+png(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/DorsalSolarReflectance_Climate_v1.png",width=6.5,height=2.25,units="in",res=300)#
+#quartz(width=6.5,height=2.25)#
+#
+par(mar=c(2.75,2.75,1.5,1))#
+par(mfrow=c(1,3))#
+#
+### Panel A ####
+plot(hola_ir_dorsal$dorsal_solar_reflectance~ (bio_pca$scores[,1]),col=col_plot_df[as.character(ssp_fact[rownames(hola_ir_dorsal)]),1],pch=21,lwd=0.45,axes=F,xlab="",ylab="")#
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,1])#
+corner.label(paste0("r = ",round(cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,1])$estimate,2)))#
+abline(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,1]))#
+#
+box()#
+#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Seasonality (PC1)",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Dorsal Solar Reflectance",side=2,line=1.5,cex=0.75)#
+#
+### Panel B ####
+plot(hola_ir_dorsal$dorsal_solar_reflectance~ bio_pca$scores[,2],col=col_plot_df[as.character(ssp_fact[rownames(hola_ir_dorsal)]),1],pch=21,lwd=0.45,axes=F,xlab="",ylab="")#
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,2])#
+corner.label(paste0("r = ",round(cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,2])$estimate,2)))#
+abline(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,2]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Aridity (PC2)",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Dorsal Solar Reflectance",side=2,line=1.5,cex=0.75)#
+#
+### Panel C ####
+plot(hola_ir_dorsal$dorsal_solar_reflectance~ bio_pca$scores[,3],col=col_plot_df[as.character(ssp_fact[rownames(hola_ir_dorsal)]),1],pch=21,lwd=0.45,axes=F,xlab="",ylab="")#
+cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,3])#
+corner.label(paste0("r = ",round(cor.test(hola_ir_dorsal$dorsal_solar_reflectance,bio_pca$scores[,3])$estimate,2)))#
+#abline(lm(hola_ir_dorsal$dorsal_solar_reflectance~bio_pca$scores[,3]))#
+#
+box()#
+axis(1,tck=-0.025,mgp=c(0,0.25,0),cex.axis= 0.625)#
+mtext("Temperature (PC3)",side=1,line=1.5,cex=0.75)#
+#
+axis(2,tck=-0.025,mgp=c(0,0.5,0),cex.axis=0.625)#
+mtext("Dorsal Solar Reflectance",side=2,line=1.5,cex=0.75)#
+#
+dev.off()
+### STJA Phenotypic Analyses ####
+require(xlsx)#
+require(plotrix)#
+require(viridis)#
+require(plotrix)#
+require(nlme)#
+require(MASS)#
+#
+### Citation information ####
+citation("nlme")#
+citation("MASS")#
+stja_pheno<-read.xlsx2("~/Desktop/Manuscripts/StellersJays/Data/Cyanocitta_stelleri_measurements_FINAL_20190416_forR.xlsx",sheetName="Morph Data Set",stringsAsFactors=F,header=T)#
+#
+stja_pheno<-stja_pheno[-1036,] #Remove empty row#
+rownames(stja_pheno)<-stja_pheno$CAT_NUM#
+#
+stja_pheno[stja_pheno$POPULATION %in% 50:55,]$GROUP2<-"Contact"#
+#
+### Set up factors ####
+stja_pheno$POPULATION<-factor(stja_pheno$POPULATION,levels=as.character(1:max(as.numeric(stja_pheno$POPULATION))))#
+stja_pheno<-stja_pheno[order(as.numeric(stja_pheno$POPULATION)),]#
+#
+stja_pheno$GROUP2<-gsub("Pacific","Coastal",stja_pheno$GROUP2)#
+#
+stja_pheno$GROUP2<-factor(stja_pheno$GROUP2,levels=c("Coastal","Interior","Contact","Rocky"))#
+#
+### Data transformations ####
+hist(as.numeric(stja_pheno$MASS)) ## This looks normally distributed, not sure we need to transform, but will look at residuals from LGMs#
+#
+stja_pheno$EYE.LINE.A<-as.numeric(stja_pheno$EYE.LINE.L) * as.numeric(stja_pheno$EYE.LINE.W) #Get area of eye line#
+head(stja_pheno)#
+stja_pheno$TARSUSTOE.L<-as.numeric(stja_pheno$TARSUS.L) + as.numeric(stja_pheno$TOE.L) #Combine toe and tarsus lengths#
+#
+### PCA ####
+head(stja_pheno)#
+colnames(stja_pheno)#
+#
+rownames(stja_pca$scores)[order(stja_pca$scores[,1])]#
+#
+stja_pca_char<-data.frame(apply(stja_pheno[c(15,16,19,20,21,22,25,27)],2,as.numeric)) ##Omitting Eye Line Area since it is sort of a binary character#
+colnames(stja_pca_char)#
+rownames(stja_pca_char)<-stja_pheno$CAT_NUM#
+#
+stja_pca<-princomp(na.omit(stja_pca_char))#
+stja_pca$scores#
+stja_pca$loadings#
+write.xlsx(file="/Users/NickMason/Desktop/Manuscripts/StellersJays/Tables/STJA_PCA_loadings_v2.xlsx",stja_pca$loadings[,1:2])#
+#
+stja_pca$sdev[1]/sum(stja_pca$sdev)#
+stja_pca$sdev[2]/sum(stja_pca$sdev)#
+#
+rownames(stja_pca$scores)#
+#
+STJA_PCA_contact<-as.data.frame(stja_pca$scores)[rownames(stja_pheno)[stja_pheno$POPULATION %in% c(41,43,49,50,51,52,53,54,55,60,61)],1:2]#
+rownames(STJA_PCA_contact)<-rownames(stja_pheno)[stja_pheno$POPULATION %in% c(41,43,49,50,51,52,53,54,55,60,61)]#
+#
+STJA_PCA_contact$POPULATION<-stja_pheno[rownames(STJA_PCA_contact),]$POPULATION#
+#
+write.xlsx(STJA_PCA_contact,file="/Users/NickMason/Desktop/Manuscripts/StellersJays/Tables/STJA_PCA_scores_v4.xlsx")#
+nrow(STJA_PCA_contact)#
+#
+### Box plots of each character ####
+stja_pheno<-cbind(stja_pheno,PC1=data.frame(stja_pca$scores)[rownames(stja_pheno),1],PC2=data.frame(stja_pca$scores)[rownames(stja_pheno),2])#
+head(stja_pheno)#
+colnames(stja_pheno)#
+chars2explore<-c(28,29,15,16,19,20,21,22,25,26,27)
+for(i in 1:length(chars2explore)){#
+#
+pdf(file=paste0("~/Desktop/Manuscripts/StellersJays/Figures/",colnames(stja_pheno)[chars2explore[i]],"_boxplots_v3.pdf"),width=3.25,height=4)	#
+#
+#quartz(width=3.25,height=4)#
+layout(matrix(c(1,2,3,3,4,4),byrow=T,ncol=2))#
+par(lwd=0.5)#
+par(mar=c(1.5,2,1,1))#
+#
+### Plot A ####
+boxplot(as.numeric(stja_pheno[,chars2explore[i]])~ stja_pheno$SEX,col=c("#F0F0F060","#00000060"),axes=F,main="")#
+axis(1,labels=c("female","male"),at=c(1,2),mgp=c(0,0.25,0),tck=-0.025,lwd=0.5)#
+axis(2,tck=-0.025,mgp=c(0,0.25,0),lwd=0.5)#
+mtext(text=colnames(stja_pheno)[chars2explore[i]],side=2,cex=0.5,line=1.25)#
+box()#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.075,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.075,label="A",font=2,cex=1)#
+#
+### Plot B ####
+boxplot(as.numeric(stja_pheno[,chars2explore[i]])~ stja_pheno$AGE,col=c("#F0F0F060","#00000060"),axes=F,main="")#
+axis(1,labels=c("first-year","adult"),at=c(1,2),mgp=c(0,0.25,0),tck=-0.025,lwd=0.5)#
+axis(2,tck=-0.025,mgp=c(0,0.25,0),lwd=0.5)#
+mtext(text=colnames(stja_pheno)[chars2explore[i]],side=2,cex=0.5,line=1.25)#
+box()#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.075,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.075,label="B",font=2,cex=1)#
+#
+### Plot C ####
+boxplot(as.numeric(stja_pheno[,chars2explore[i]])~stja_pheno$GROUP2,col=c("#FFFF0060","skyblue","orange","purple"),axes=F)#
+axis(1,labels=c("Coastal","Interior","Contact","Rocky"),at=c(1:4),mgp=c(0,0.25,0),tck=-0.025,lwd=0.5)#
+axis(2,tck=-0.025,mgp=c(0,0.25,0),lwd=0.5)#
+mtext(text=colnames(stja_pheno)[chars2explore[i]],side=2,cex=0.5,line=1.25)#
+box()#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.025,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.075,label="C",font=2,cex=1)#
+#
+### Plot D ####
+boxplot(as.numeric(stja_pheno[,chars2explore[i]])~stja_pheno$POPULATION,col=c("#FFFF0060","skyblue","orange","purple")[as.numeric(stja_pheno$GROUP2)[!duplicated(stja_pheno$POPULATION)]],axes=F)#
+axis(1,at=1:68,label=as.character(1:68),tck=-0.025,mgp=c(0,0.25,0),lwd=0.5)#
+axis(2,tck=-0.025,mgp=c(0,0.25,0),lwd=0.5)#
+mtext(text=colnames(stja_pheno)[chars2explore[i]],side=2,cex=0.5,line=1.25)#
+box()#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.025,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.075,label="D",font=2,cex=1)#
+#
+dev.off()#
+}
+require(ape)#
+require(phyloch)#
+require(xlsx)#
+require(phytools)#
+#
+### Getting uncorrected DNA distances ####
+stja_dna<-read.nexus.data("~/Desktop/Manuscripts/StellersJays/PhyloND2/BEAST/STJA_ND2_subsampled.nex")#
+#
+names(stja_dna)#
+gymno<-stja_dna[1:2]#
+aphe<-stja_dna[3:4]#
+crist<-stja_dna[5:7]#
+stja_puebla<-stja_dna[8]#
+stja_chiapas<-stja_dna[9]#
+stja_gua<-stja_dna[10:11]#
+stja_coastal<-stja_dna[12:31]#
+stja_interior<-stja_dna[32:51]#
+stja_rocky<-stja_dna[52:71]#
+#
+?dist.dna#
+#
+getDNAstats<-function(list1,list2){#
+	dist_foo<-dist.dna(as.DNAbin(c(list1,list2),model="raw",as.matrix=T))#
+	dist_trim<-as.matrix(dist_foo)[((length(list1)+1):length(c(list1, list2))),(1:length(list2))]#
+	dist_min<-min(dist_trim)#
+	dist_mean<-mean(dist_trim)#
+	dist_max<-max(dist_trim)#
+	return(list(min=dist_min,mean=dist_mean,max=dist_max))#
+}#
+#
+stja_coastal_vs_interior<-getDNAstats(stja_coastal,stja_interior)#
+stja_rocky_vs_mex<-getDNAstats(stja_rocky,c(stja_puebla,stja_chiapas,stja_gua))#
+stja_coastalinterior_vs_rockymex<-getDNAstats(c(stja_coastal,stja_interior),c(stja_rocky,stja_puebla,stja_chiapas,stja_gua))#
+stja_coastalinterior_vs_rockymex<-getDNAstats(c(stja_coastal,stja_interior),c(stja_rocky,stja_puebla,stja_chiapas,stja_gua))#
+stja_vs_cyano<-getDNAstats(c(stja_coastal,stja_interior,stja_rocky,stja_puebla,stja_chiapas,stja_gua),crist)#
+aphe_vs_gymno<-getDNAstats(gymno,aphe)#
+stja_vs_aphegymno<-getDNAstats(c(stja_coastal,stja_interior,stja_rocky,stja_puebla,stja_chiapas,stja_gua),c(aphe,gymno))
+aphe_vs_aphe<-getDNAstats(aphe[1],aphe[2])
+aphe_vs_aphe
+aphe
+aphe_vs_aphe
+stja_coastalinterior_vs_rockymex
+sample(1:15,15)
+6.5/3
+### Case study of horned lark dimorphism for AOS review paper ####
+library(raster)#
+library(sp)#
+library(tictoc)#
+library(mclust)#
+library(xlsx)#
+library(mixtools)#
+library(diptest)#
+library(rgeos)#
+library(spatialEco)#
+library(pavo)#
+require(gplots)#
+require("agricolae")#Provides HSD.test()
+### read in voucher table ####
+vouchers<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Data/VoucherTable_v4.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=2)#
+table(vouchers$infraspecificepithet)#
+actia<-vouchers[vouchers$infraspecificepithet=="actia",]#
+#
+### read in ImageJ analysis of FFT ####
+hola_imagej<-read.csv("~/Desktop/Manuscripts/LarkPhenoEnv/Data/Image Analysis Results Nikon D7000 Novoflex 35mm D65 to Bluetit D65.csv",row.names=1)#
+rownames(hola_imagej)<-gsub("MVZ","",rownames(hola_imagej))#
+hola_imagej<-hola_imagej[grep("_D_b1",rownames(hola_imagej)),]#
+rownames(hola_imagej)<-gsub("_D_b1","",rownames(hola_imagej))#
+#
+# Run this line in terminal int he zip file directory#
+# for f in *.zip; do unzip -d "${f%*.zip}" "$f"; done#
+#
+### Get smallest scalebar of the bunch ####
+sb_cat<-sapply(strsplit(list.dirs("/Volumes/CajaNegra/LarkPhenoEnv/Photos/MeasuredPhotos"),"/"),function(x) gsub("_D","",gsub("MVZ","",x[length(x)])))[-1]#
+#
+files<-lapply(paste0("/Volumes/CajaNegra/LarkPhenoEnv/Photos/MeasuredPhotos/MVZ",sb_cat,"_D"),list.files)#
+names(files)<-sb_cat
+files_correct<-files[sapply(files,length)==4]#
+sb_num<-as.numeric(sapply(strsplit(sapply(files_correct,function(x) grep("Scale Bar",x,value=T)),":"),function(x) x[2]))#
+names(sb_num)<-names(files_correct)#
+sb_num#
+#
+### process photos ####
+file_names<-list.files("/Volumes/CajaNegra/LarkPhenoEnv/Photos/PhotoMeasurements")#
+file_names_full<-list.files("/Volumes/CajaNegra/LarkPhenoEnv/Photos/PhotoMeasurements",full.names=T)#
+file_names<-data.frame(catalog=sapply(strsplit(file_names,"_"),function(x) x[1]),file=file_names_full,stringsAsFactors=F)#
+file_list<-split(file_names,file_names$catalog)#
+names(file_list)<-gsub("MVZ","",names(file_list))#
+#
+file_list<-file_list[names(file_list) %in% names(sb_num)]#
+#
+### Process Photos ####
+i<-1
+pattern_stats
+source("/Volumes/CajaNegra/LarkPhenoEnv/Routput/patternizeOutput.rD")
+load("/Volumes/CajaNegra/LarkPhenoEnv/Routput/patternizeOutput.rD")
+load("/Volumes/CajaNegra/LarkPhenoEnv/Routput/patternizePolygons.Rd")
+show(load("/Volumes/CajaNegra/LarkPhenoEnv/Routput/patternizeOutput.rD"))
+show(load("/Volumes/CajaNegra/LarkPhenoEnv/Routput/patternizePolygons.Rd"))
+show(load("/Volumes/CajaNegra/LarkPhenoEnv/Routput/patternizeValues.Rd"))
+summary_trim<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/PlumagePatterns/Data/HOLA_casestudy_appendix_v3.xlsx",sheetName="Sheet1")
+head(summary_trim)
+require(MASS)
+summary_sex<-split(summary_trim,summary_trim$sex)
+summary_sex[[1]]
+colnames(summary_sex[[1]])
+colnames(summary_sex[[1]][c(23,12,15,13)])
+dfa_m<-lda(infraspecificepithet~.,data=summary_sex[[1]][c(2,23,12,15,13,17)])
+patternizePolygons[[1]]
+plot(patternizePolygons[[1]][[1]])
+plot(patternizePolygons[[1]][1])
+plot(patternizePolygons[[1]])
+plot(patternizePolygons[[1]][[1]])
+photoProcess
+### process photos ####
+file_names<-list.files("/Volumes/CajaNegra/LarkPhenoEnv/Photos/PhotoMeasurements")#
+file_names_full<-list.files("/Volumes/CajaNegra/LarkPhenoEnv/Photos/PhotoMeasurements",full.names=T)#
+file_names<-data.frame(catalog=sapply(strsplit(file_names,"_"),function(x) x[1]),file=file_names_full,stringsAsFactors=F)#
+file_list<-split(file_names,file_names$catalog)#
+names(file_list)<-gsub("MVZ","",names(file_list))#
+#
+file_list<-file_list[names(file_list) %in% names(sb_num)]
+dfa_f<-lda(infraspecificepithet~.,data=summary_sex[[2]][c(2,23,12,15,13,17)])
+dfa_m_predict<-predict(dfa_m)
+dfa_f_predict<-predict(dfa_f)
+col2hex(c25[as.numeric(summary_trim[names(pP_trim)[i],]$infraspecificepithet)])
+summary_sex[[1]]$infraspecificepithet
+plot(dfa_m_predict$x[,1],dfa_m_predict$x[,2],pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)])
+paste0(c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],"80")
+quartz(width=6.25,height=6.5/2)#
+#
+par(mfrow=c(1,2))#
+par(mar=c(2.5,3,2,1))#
+plot(dfa_m_predict $x[,1], dfa_m_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Male DFA (66.43%)",cex.main=1)#
+box()
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)
+plot(dfa_f_predict $x[,1], dfa_f_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Female DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)
+png(file="~/Desktop/Manuscripts/PlumagePatterns/Figures/LarkPlumageDFA.png",width=6.5,height=6.5/2,units="in",res=500)#
+#quartz(width=6.25,height=6.5/2)#
+#
+par(mfrow=c(1,2))#
+par(mar=c(2.5,3,2,1))#
+plot(dfa_m_predict $x[,1], dfa_m_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Male DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1)#
+#legend("bottomleft",legend=paste0(tolower(levels(junco_data_m$Subspecies))," (",diag(as.matrix(CV_tab_m)),"/", apply(as.matrix(CV_tab_m),1,sum)," = ",round(diag(as.matrix(CV_tab_m))/apply(as.matrix(CV_tab_m),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg=paste0(rev(junco_cols),"80"), col=junco_cols,lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+plot(dfa_f_predict $x[,1], dfa_f_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Female DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#
+# text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[2],font=2,cex=1)#
+# legend("bottomleft",legend=paste0(tolower(levels(junco_data_f$Subspecies))," (",diag(as.matrix(CV_tab_f)),"/", apply(as.matrix(CV_tab_f),1,sum)," = ",round(diag(as.matrix(CV_tab_f))/apply(as.matrix(CV_tab_f),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg= paste0(rev(junco_cols),"80"),lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+dev.off()
+split(summary_trim,summary_trim$sex)
+summary_sex[[1]]$sex
+png(file="~/Desktop/Manuscripts/PlumagePatterns/Figures/LarkPlumageDFA.png",width=6.5,height=6.5/2,units="in",res=500)#
+#quartz(width=6.25,height=6.5/2)#
+#
+par(mfrow=c(1,2))#
+par(mar=c(2.5,3,2,1))#
+plot(dfa_m_predict $x[,1], dfa_m_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Female DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1)#
+#legend("bottomleft",legend=paste0(tolower(levels(junco_data_m$Subspecies))," (",diag(as.matrix(CV_tab_m)),"/", apply(as.matrix(CV_tab_m),1,sum)," = ",round(diag(as.matrix(CV_tab_m))/apply(as.matrix(CV_tab_m),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg=paste0(rev(junco_cols),"80"), col=junco_cols,lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+plot(dfa_f_predict $x[,1], dfa_f_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Male DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#
+# text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[2],font=2,cex=1)#
+# legend("bottomleft",legend=paste0(tolower(levels(junco_data_f$Subspecies))," (",diag(as.matrix(CV_tab_f)),"/", apply(as.matrix(CV_tab_f),1,sum)," = ",round(diag(as.matrix(CV_tab_f))/apply(as.matrix(CV_tab_f),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg= paste0(rev(junco_cols),"80"),lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+dev.off()
+summary_sex<-split(summary_trim,summary_trim$sex)#
+summary_sex[[1]]$sex#
+dfa_f<-lda(infraspecificepithet~.,data=summary_sex[[1]][c(2,23,12,15,13,17)])#
+dfa_f_predict<-predict(dfa_f)#
+#
+dfa_m<-lda(infraspecificepithet~.,data=summary_sex[[2]][c(2,23,12,15,13,17)])#
+dfa_m_predict<-predict(dfa_fm#
+#
+### Scatterplots of DFA ####
+plot(dfa_m_predict$x[,1],dfa_m_predict$x[,2],pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)])#
+#
+png(file="~/Desktop/Manuscripts/PlumagePatterns/Figures/LarkPlumageDFA.png",width=6.5,height=6.5/2,units="in",res=500)#
+#quartz(width=6.25,height=6.5/2)#
+#
+par(mfrow=c(1,2))#
+par(mar=c(2.5,3,2,1))#
+plot(dfa_m_predict $x[,1], dfa_m_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Male DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1)#
+#legend("bottomleft",legend=paste0(tolower(levels(junco_data_m$Subspecies))," (",diag(as.matrix(CV_tab_m)),"/", apply(as.matrix(CV_tab_m),1,sum)," = ",round(diag(as.matrix(CV_tab_m))/apply(as.matrix(CV_tab_m),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg=paste0(rev(junco_cols),"80"), col=junco_cols,lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+plot(dfa_f_predict $x[,1], dfa_f_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Female DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#
+# text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[2],font=2,cex=1)#
+# legend("bottomleft",legend=paste0(tolower(levels(junco_data_f$Subspecies))," (",diag(as.matrix(CV_tab_f)),"/", apply(as.matrix(CV_tab_f),1,sum)," = ",round(diag(as.matrix(CV_tab_f))/apply(as.matrix(CV_tab_f),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg= paste0(rev(junco_cols),"80"),lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+dev.off()
+dfa_f<-lda(infraspecificepithet~.,data=summary_sex[[1]][c(2,23,12,15,13,17)])#
+dfa_f_predict<-predict(dfa_f)#
+#
+dfa_m<-lda(infraspecificepithet~.,data=summary_sex[[2]][c(2,23,12,15,13,17)])#
+dfa_m_predict<-predict(dfa_m)#
+#
+### Scatterplots of DFA ####
+plot(dfa_m_predict$x[,1],dfa_m_predict$x[,2],pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)])#
+#
+png(file="~/Desktop/Manuscripts/PlumagePatterns/Figures/LarkPlumageDFA.png",width=6.5,height=6.5/2,units="in",res=500)#
+#quartz(width=6.25,height=6.5/2)#
+#
+par(mfrow=c(1,2))#
+par(mar=c(2.5,3,2,1))#
+plot(dfa_m_predict $x[,1], dfa_m_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Male DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1)#
+#legend("bottomleft",legend=paste0(tolower(levels(junco_data_m$Subspecies))," (",diag(as.matrix(CV_tab_m)),"/", apply(as.matrix(CV_tab_m),1,sum)," = ",round(diag(as.matrix(CV_tab_m))/apply(as.matrix(CV_tab_m),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg=paste0(rev(junco_cols),"80"), col=junco_cols,lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+plot(dfa_f_predict $x[,1], dfa_f_predict $x[,2]*-1,axes=F,pch=21,bg=c25[as.numeric(summary_sex[[1]]$infraspecificepithet)],lwd=1)#
+title(main="Female DFA",cex.main=1)#
+box()#
+axis(1,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD1",side=1,line=1.5)#
+axis(2,mgp=c(0,0.5,0),tck=-0.035,cex.axis=0.75)#
+mtext(text="LD2",side=2,line=1.5)#
+#
+# text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[2],font=2,cex=1)#
+# legend("bottomleft",legend=paste0(tolower(levels(junco_data_f$Subspecies))," (",diag(as.matrix(CV_tab_f)),"/", apply(as.matrix(CV_tab_f),1,sum)," = ",round(diag(as.matrix(CV_tab_f))/apply(as.matrix(CV_tab_f),1,sum)*100,2),"%)"),pt.cex=1,cex=0.4,pch=21,pt.bg= paste0(rev(junco_cols),"80"),lwd=0,x.intersp=0,box.lwd=1,bg="transparent")#
+#
+dev.off()
+library(raster)#
+library(sp)#
+library(xlsx)#
+library(spatialEco)#
+library(ggsci)#
+library(pavo)#
+library(ks)#
+library(gplots)#
+library(plotrix)#
+library(MuMIn)#
+library(metafor)#
+library(agricolae)#Provides HSD.test()#
+#
+### Quantile function from P Title ####
+# get quantile contour#
+quantileContour <- function(xy, q) {#
+	kd <- ks::kde(xy, compute.cont = TRUE)#
+	q <- paste0((1 - q)*100, '%')#
+	contour_q <- with(kd, contourLines(x=eval.points[[1]], y=eval.points[[2]], z=estimate, levels=cont[q])[[1]])#
+	data.frame(contour_q)[, 2:3]#
+}#
+#
+#lines(quantileContour(xy, 0.95), col = 'red', lwd = 1.5)#
+#
+#####################
+### READ IN DATA ####
+#####################
+#
+### Plotting colors ####
+show(load("~/Desktop/Manuscripts/LarkPhenoEnv/Figures/hola_col_plot_df.Rd"))#
+col_plot_df#
+#
+### Read in voucher data ####
+vouchers<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Data/VoucherTable_v4.xlsx",sheetName="Sheet1",stringsAsFactors=F)#
+rownames(vouchers)<-paste("MVZ",vouchers$catalognumber,sep="")#
+vouchers$infraspecific <-factor(vouchers$infraspecific,levels=c("strigata","merrilli","lamprochroma","utahensis","rubea","sierrae","actia","insularis","ammophila","leucansiptila","occidentalis","adusta","alpestris","arcticola","enertera","hoyti","aphrasta"))#
+#
+length(table(vouchers$infraspecific))#
+#
+### Read in pavo plumage data ####
+back_light_df<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_PavoColorData_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in plumage pattern data ####
+pattern<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BackPattern_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(pattern)){#
+	pattern[,i]<-as.numeric(pattern[,i])#
+}#
+#
+### Read in FullSpectrumData Set ####
+hola_ir_dorsal<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+hola_ir_ventral<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Ventral_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in abiotic data ####
+bio_data<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BioClim_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(bio_data)){#
+	bio_data[,i]<-as.numeric(bio_data[,i])#
+}#
+#
+### PCA on bioclim ####
+bio_pca<-princomp(bio_data)#
+bio_pca$scores[,1]<-bio_pca$scores[,1]*-1#
+bio_pca$loadings#
+#
+### write out supplementary table with bioclim PCA loadings ####
+#write.xlsx(bio_pca$loadings[,1:3],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/BioClimPCALoadings.xlsx")#
+#
+colnames(vouchers)#
+data4eric<-data.frame(vouchers[rownames(bio_pca$scores),],bio_data,bio_pca$scores[,1:3])#
+#write.xlsx(data4eric,file="/Users/NickMason/Desktop/HOLA_ClimateData_08May2020.xlsx")#
+#
+### Read in soil composition data ####
+soil_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilComposition_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_pca<-princomp(soil_df)#
+soil_pca$loadings#
+#
+### Read in soil color data ####
+soil_col_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilColor_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+soil_col_pca<-princomp(na.omit(soil_col_df[,1:3]))#
+nrow(soil_col_pca$scores)#
+#write.xlsx(soil_col_pca$loadings[,1:2],file="/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Tables/HOLA_SoilColorLoadings_v1.xlsx")#
+#
+soil_color_rgb<-apply(na.omit(soil_col_df),1,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))#
+#
+######################
+### DATA ANALYSIS ####
+######################
+### Set up plotting factor and colors from darkest to lightest ####
+factor_df<-data.frame(ssp=vouchers$infraspecific,hola_ir_dorsal)#
+avg_ref<-tapply(factor_df$dorsal_solar_reflectance, factor_df$ssp,mean)#
+#
+vouchers$infraspecific <-factor(vouchers$infraspecific,levels=names(sort(avg_ref)))#
+ssp_fact<-vouchers$infraspecific#
+names(ssp_fact)<-rownames(vouchers)#
+#
+### Phenotypic varition results / plot ####
+col_data<-data.frame(row.names=rownames(vouchers),ssp=vouchers$infraspecificepithet,sex=factor(vouchers$sex),lumMean=pattern[rownames(vouchers),]$lumMean,r.achieved=back_light_df[rownames(vouchers),]$r.achieved,h.theta= back_light_df[rownames(vouchers),]$h.theta, h.phi=back_light_df[rownames(vouchers),]$h.phi,power= pattern[rownames(vouchers),]$sumPower)#
+col_data $ssp <-factor(col_data $ssp,levels=c("strigata","merrilli","lamprochroma","utahensis","rubea","sierrae","actia","insularis","ammophila","leucansiptila","occidentalis","adusta","alpestris","arcticola","enertera","hoyti","aphrasta"))#
+#
+### Ensure numerical characters are stored as numerical (not factor) ####
+for(i in 3:7){#
+	col_data[,i]<-as.numeric(col_data[,i])#
+}#
+str(col_data)#
+color_pca<-princomp(col_data[,c(3,4,7)]) #Principal component analysis of luminosity, chroma, and power#
+#
+col_data<-cbind(col_data,color_pca$scores[,1:2])#
+col_data_sex<-split(col_data,col_data$sex)#
+#
+### Tukey's post-hoc test split by sex to group ssp variation ####
+## Female mean luminosity ###
+glm_female_lumMean<-glm(lumMean~ssp,data=col_data_sex$female)#
+aov_female_lumMean<-aov(glm_female_lumMean)#
+hsdtest_female_lumMean<-HSD.test(aov_female_lumMean,trt="ssp",group=T,console=T)#
+hsdtest_female_lumMean$groups[levels(col_data_sex$female$ssp)[levels(col_data_sex$female$ssp) %in% rownames(hsdtest_female_lumMean$groups)],]#
+#
+## Male mean luminosity ###
+glm_male_lumMean<-glm(lumMean~ssp,data=col_data_sex$male)#
+aov_male_lumMean<-aov(glm_male_lumMean)#
+hsdtest_male_lumMean<-HSD.test(aov_male_lumMean,trt="ssp",group=T,console=T)#
+hsdtest_male_lumMean$groups[levels(col_data_sex$male$ssp)[levels(col_data_sex$male$ssp) %in% rownames(hsdtest_male_lumMean$groups)],]#
+#
+## Female r.achieved ###
+glm_female_r.achieved<-glm(r.achieved~ssp,data=col_data_sex$female)#
+aov_female_r.achieved<-aov(glm_female_r.achieved)#
+hsdtest_female_r.achieved<-HSD.test(aov_female_r.achieved,trt="ssp",group=T,console=T)#
+hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp)[levels(col_data_sex$female$ssp) %in% rownames(hsdtest_female_r.achieved$groups)],]#
+#
+## Male r.achieved ###
+glm_male_r.achieved<-glm(r.achieved~ssp,data=col_data_sex$male)#
+aov_male_r.achieved<-aov(glm_male_r.achieved)#
+hsdtest_male_r.achieved<-HSD.test(aov_male_r.achieved,trt="ssp",group=T,console=T)#
+hsdtest_male_r.achieved$groups[levels(col_data_sex$male$ssp)[levels(col_data_sex$male$ssp) %in% rownames(hsdtest_male_r.achieved$groups)],]#
+#
+## Female power ###
+glm_female_power<-glm(power~ssp,data=col_data_sex$female)#
+aov_female_power<-aov(glm_fem_power)#
+hsdtest_female_power<-HSD.test(aov_fem_power,trt="ssp",group=T,console=T)#
+hsdtest_female_power$groups[levels(col_data_sex$female$ssp)[levels(col_data_sex$female$ssp) %in% rownames(hsdtest_fem_power$groups)],]#
+#
+## Male power ###
+glm_male_power<-glm(power~ssp,data=col_data_sex$male)#
+aov_male_power<-aov(glm_mal_power)#
+hsdtest_male_power<-HSD.test(aov_mal_power,trt="ssp",group=T,console=T)#
+hsdtest_male_power$groups[levels(col_data_sex$male$ssp)[levels(col_data_sex$male$ssp) %in% rownames(hsdtest_mal_power$groups)],]#
+#
+### Phenotypic variation summary plot
+quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(7,3,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+sexes<-c("female","male")#
+characters2plot<-c("lumMean","r.achieved","power")#
+#
+par(mar=c(0.5,1.5,0.5,0.5))#
+par(xpd=T)#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+mfpoints$y<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints$y[1],mfpoints$y[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+charpoints$y<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints$y[1], charpoints$y[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+mfpoints$y<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints$y[1],mfpoints$y[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+charpoints$y<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints$y[1], charpoints$y[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(7,3,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+sexes<-c("female","male")#
+characters2plot<-c("lumMean","r.achieved","power")#
+#
+par(mar=c(0.5,1.5,0.5,0.5))#
+par(xpd=T)#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)
+labs
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])
+hsdtest_female_power<-HSD.test(aov_fem_power,trt="ssp",group=T,console=T)
+## Female power ###
+glm_female_power<-glm(power~ssp,data=col_data_sex$female)#
+aov_female_power<-aov(glm_fem_power)#
+hsdtest_female_power<-HSD.test(aov_fem_power,trt="ssp",group=T,console=T)#
+hsdtest_female_power$groups[levels(col_data_sex$female$ssp)[levels(col_data_sex$female$ssp) %in% rownames(hsdtest_fem_power$groups)],]
+aov_female_power<-aov(glm_female_power)
+hsdtest_female_power<-HSD.test(aov_female_power,trt="ssp",group=T,console=T)
+hsdtest_female_power$groups[levels(col_data_sex$female$ssp)[levels(col_data_sex$female$ssp) %in% rownames(hsdtest_fem_power$groups)],]
+## Female power ###
+glm_female_power<-glm(power~ssp,data=col_data_sex$female)#
+aov_female_power<-aov(glm_female_power)#
+hsdtest_female_power<-HSD.test(aov_female_power,trt="ssp",group=T,console=T)#
+hsdtest_female_power$groups[levels(col_data_sex$female$ssp)[levels(col_data_sex$female$ssp) %in% rownames(hsdtest_female_power$groups)],]
+## Male power ###
+glm_male_power<-glm(power~ssp,data=col_data_sex$male)#
+aov_male_power<-aov(glm_male_power)#
+hsdtest_male_power<-HSD.test(aov_male_power,trt="ssp",group=T,console=T)#
+hsdtest_male_power$groups[levels(col_data_sex$male$ssp)[levels(col_data_sex$male$ssp) %in% rownames(hsdtest_male_power$groups)],]
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(7,3,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+sexes<-c("female","male")#
+characters2plot<-c("lumMean","r.achieved","power")#
+#
+par(mar=c(0.5,1.5,0.5,0.5))#
+par(xpd=T)#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}
+#mfpoints<-locator(2)#
+mfpoints$y<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints$y[1],mfpoints$y[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+charpoints$y<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints$y[1], charpoints$y[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+### Run granularity soil pca ####
+grain_pca<-princomp(soil_df[,c(1,2,3,4)])
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)
+charpoints<-c(30910.94,142979.33)
+charpoints
+text(y=seq(charpoints[1], charpoints[2],length.out=6),x=-0.5,labels=rep("Back patterning power","Acheived chroma","Brightness"),srt=90)
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-0.5,labels=rep("Back patterning power","Acheived chroma","Brightness"),srt=90)
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-0.5,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.5,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(7,3,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+sexes<-c("female","male")#
+characters2plot<-c("lumMean","r.achieved","power")#
+#
+par(mar=c(0.5,1.5,0.5,0.5))#
+par(xpd=T)#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)
+color_pca$loadings
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))
+layout.show(8)
+par(mar=c(8,4,1,1))
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)
+locator(1)
+text(x=11500,y=-5300,label="Brighter\nMore Dorsal Patterning",cex=0.5)
+text(x=11500,y=-5300,label="Brighter\nMore Dorsal Patterning",cex=0.75)
+text(x=11500,y=-5200,label="Brighter\nMore Dorsal Patterning",cex=0.75)
+text(x=11500,y=-5000,label="Brighter\nMore Dorsal Patterning",cex=0.75)
+text(x=-6500,y=-5000,label="Darker\nLess Dorsal Patterning",cex=0.7)
+locator(1)
+text(x=-13600,y=5250,label="Brighter\nLess Dorsal Patterning",cex=0.7,srt=90)
+text(x=-14000,y=5250,label="Brighter\nLess Dorsal Patterning",cex=0.7,srt=90)
+color_pca$loadings
+AICc(lum_soilpc1)#
+AICc(lum_soilpc1_sex1)#
+AICc(lum_soilpc1_sex2)
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-1250,label="Darker\nMore Patterning",cex=0.7)
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+sexes<-c("female","male")#
+characters2plot<-c("lumMean","r.achieved","power")#
+#
+par(mar=c(0.5,1.5,0.5,0.5))#
+par(xpd=T)#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-1250,label="Darker\nMore Patterning",cex=0.7,srt=90)
+text(x=-14000,y=-1750,label="Darker\nMore Patterning",cex=0.7,srt=90)
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-1750,label="Darker\nMore Patterning",cex=0.7,srt=90)
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)
+par(mar=c(0.5,1.5,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,1.75,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)
+pdf(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/PhenotypicSummary_v1.pdf",width=6.5,height=4.5)#
+#quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,1.75,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+pdf(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/PhenotypicSummary_v1.pdf",width=6.5,height=4.5)#
+#quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(8,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,1.75,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+### Phenotypic variation summary plot ####
+pdf(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/PhenotypicSummary_v1.pdf",width=6.5,height=4.5)#
+#quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(9,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,1.75,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(9,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,2.5,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+### Phenotypic variation summary plot ####
+pdf(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/PhenotypicSummary_v1.pdf",width=6.5,height=4.5)#
+#quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(9,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,4,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(9,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,3,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))
+### Phenotypic variation summary plot ####
+pdf(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/PhenotypicSummary_v1.pdf",width=6.5,height=4.5)#
+#quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(9,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,3,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.6)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+### Phenotypic variation summary plot ####
+pdf(file="~/Desktop/Manuscripts/LarkPhenoEnv/Figures/PhenotypicSummary_v1.pdf",width=6.5,height=4.5)#
+#quartz(width=6.5,height=4.5)#
+#
+### Set up plot layout ####
+layout(matrix(c(1,1,2,2,2,1,1,3,3,3,1,1,4,4,4,1,1,5,5,5,1,1,6,6,6,1,1,7,7,7,8,8,8,8,8,8,8,8,8,8),byrow=T,nrow=8))#
+#layout.show(8)#
+#
+#par(mfrow=c(1,2))#
+#
+par(mar=c(9,4,1,1))#
+#
+### Scatterplot of PCA space for females ####
+plot(col_data_sex[[1]]$Comp.1, col_data_sex[[1]]$Comp.2,pch=21,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[1]]$ssp),1]),"95"),xlab="",ylab="",axes=F,cex=1,lwd=0.5,xlim=range(col_data$Comp.1),ylim=range(col_data$Comp.2))#
+#
+### Add points of PCA space for males ####
+points(col_data_sex[[2]]$Comp.1, col_data_sex[[2]]$Comp.2,pch=22,bg= paste0(col2hex(col_plot_df[as.character(col_data_sex[[2]]$ssp),1]),"95"),cex=1,lwd=0.5)#
+#
+### Axis labels ####
+box()#
+#
+axis(1,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+axis(2,mgp=c(0,0.35,0),tck=-0.025,cex.axis=0.7)#
+#
+mtext(paste("PC1 (",round(color_pca $sdev[1]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=1,line=1.5,cex=0.75)#
+mtext(paste("PC2 (",round(color_pca $sdev[2]/sum(color_pca $sdev),4) * 100,"%)",sep=""),side=2,line=1.5,cex=0.75)#
+#
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.05,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.05,label=LETTERS[1],font=2,cex=1.25)#
+#
+### Annotate PCA axes ####
+par(xpd=NA)#
+#locator(1)#
+text(x=11500,y=-5000,label="Brighter\nMore Patterning",cex=0.7)#
+text(x=-6500,y=-5000,label="Darker\nLess Patterning",cex=0.7)#
+#
+#locator(1)#
+text(x=-14000,y=5250,label="Brighter\nLess Patterning",cex=0.7,srt=90)#
+text(x=-14000,y=-2000,label="Darker\nMore Patterning",cex=0.7,srt=90)#
+#
+### Box plots of male and female PC1, PC2 among subspecies ####
+### Three characters, males and females, six different plots ####
+par(mar=c(0.5,3,0.5,0.5))#
+par(xpd=T)#
+#
+## Female lumMean ###
+### Make Bar Plot ####
+bp_foo<-boxplot(lumMean~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$lumMean)[1],diff(range(col_data_sex$female$lumMean))*0.4 + range(col_data_sex$female$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_lumMean $groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$lumMean))*0.3 + range(col_data_sex$female$lumMean)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.5)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[2],font=2,cex=1.25)#
+#
+box()#
+#
+## Male lumMean ###
+### Make Bar Plot ####
+boxplot(lumMean~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$lumMean)[1],diff(range(col_data_sex$male$lumMean))*0.4 + range(col_data_sex$male$lumMean)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_lumMean $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$lumMean))*0.3 + range(col_data_sex$male$lumMean)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.5)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[3],font=2,cex=1.25)#
+#
+box()#
+#
+## Female r.achieved ###
+### Make Bar Plot ####
+bp_foo<-boxplot(r.achieved~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$r.achieved)[1],diff(range(col_data_sex$female$r.achieved))*0.4 + range(col_data_sex$female$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_r.achieved$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$female$r.achieved))*0.3 + range(col_data_sex$female$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.5)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[4],font=2,cex=1.25)#
+#
+box()#
+#
+## Male r.achieved ###
+### Make Bar Plot ####
+boxplot(r.achieved~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$r.achieved)[1],diff(range(col_data_sex$male$r.achieved))*0.4 + range(col_data_sex$male$r.achieved)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_r.achieved $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+text(label=labs,y= diff(range(col_data_sex$male$r.achieved))*0.3 + range(col_data_sex$male$r.achieved)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.5)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[5],font=2,cex=1.25)#
+#
+box()#
+#
+## Female power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$female,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$female$ssp),1],ylim=c(range(col_data_sex$female$power)[1],diff(range(col_data_sex$female$power))*0.4 + range(col_data_sex$female$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_female_power$groups[levels(col_data_sex$female$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$female$power))*0.3 + range(col_data_sex$female$power)[2]#
+,x=1:length(levels(col_data_sex$female$ssp)),cex=0.5)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[6],font=2,cex=1.25)#
+#
+box()#
+#
+## Male power ###
+### Make Bar Plot ####
+boxplot(power~ssp,data=col_data_sex$male,axes=F,lwd=0.5,col=col_plot_df[levels(col_data_sex$male$ssp),1],ylim=c(range(col_data_sex$male$power)[1],diff(range(col_data_sex$male$power))*0.4 + range(col_data_sex$male$power)[2]))#
+#
+### Add Tukey's labels ####
+labs<-toupper(hsdtest_male_power $groups[levels(col_data_sex$male$ssp),2])#
+labs[is.na(labs)]<-""#
+#
+text(label=labs,y= diff(range(col_data_sex$male$power))*0.3 + range(col_data_sex$male$power)[2]#
+,x=1:length(levels(col_data_sex$male$ssp)),cex=0.5)#
+#
+### Add corner label ####
+text(x=par("usr")[1]+diff(c(par("usr")[1],par("usr")[2]))*0.02,y=par("usr")[4]-diff(c(par("usr")[3],par("usr")[4]))*0.2,label=LETTERS[7],font=2,cex=1.25)#
+#
+box()#
+#
+### Annotate plot ####
+par(xpd=NA)#
+#
+for(i in 1:length(levels(col_data_sex$male$ssp))){#
+	text(label= levels(col_data_sex$male$ssp)[i],x=i,y=2500,srt=90,adj=c(1,0.5),col= col_plot_df[levels(col_data_sex$male$ssp)[i],1],font=3,cex=1.35)#
+}#
+#
+### Add additional annotations ####
+#mfpoints<-locator(2)#
+#mfpoints<-mfpoints$y#
+mfpoints<-c(17391.65, 157321.68)#
+text(y=seq(mfpoints[1],mfpoints[2],length.out=6),x=-0.5,labels=rep(c("male","female"),4),srt=90)#
+#
+#charpoints<-locator(2)#
+#charpoints<-charpoints$y#
+charpoints<-c(30910.94,142979.33)#
+#
+text(y=seq(charpoints[1], charpoints[2],length.out=3),x=-1.25,labels=c("Back patterning power","Acheived chroma","Brightness"),srt=90)#
+#
+dev.off()
+show(load("~/Desktop/Manuscripts/LarkPhenoEnv/Figures/hola_col_plot_df.Rd"))
+col_plot_df
+write.table(col_plot_df,file="~/HornedLarkCamouflage/col_plot_df.txt")
+col_plot_df<-read.table("~/HornedLarkCamouflage/col_plot_df.txt")
+col_plot_df
+library(raster)#
+library(sp)#
+library(xlsx)#
+library(spatialEco)#
+library(ggsci)#
+library(pavo)#
+library(ks)#
+library(gplots)#
+library(plotrix)#
+library(MuMIn)#
+library(metafor)#
+library(agricolae)#Provides HSD.test()#
+#
+setwd("~/HornedLarkCamouflage")
+vouchers<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Data/VoucherTable_v4.xlsx",sheetName="Sheet1",stringsAsFactors=F)
+write.table(vouchers,file="~/HornedLarkCamouflage/Data/HOLAVoucherTable_v4.txt")
+vouchers<-read.table("~/HornedLarkCamouflage/Data/HOLAVoucherTable_v4.txt",stringsAsFactors=F)
+vouchers
+write.csv(vouchers, "~/HornedLarkCamouflage/Data/HOLAVoucherTable_v4.csv")
+vouchers<-write.csv(vouchers,file="~/HornedLarkCamouflage/Data/HOLAVoucherTable_v4.csv")
+rownames(vouchers)<-paste("MVZ",vouchers$catalognumber,sep="")
+vouchers<-read.csv(file="~/HornedLarkCamouflage/Data/HOLAVoucherTable_v4.csv")
+vouchers<-read.csv("~/HornedLarkCamouflage/Data/HOLAVoucherTable_v4.csv")
+rownames(vouchers)<-paste("MVZ",vouchers$catalognumber,sep="")
+vouchers$infraspecific <-factor(vouchers$infraspecific,levels=c("strigata","merrilli","lamprochroma","utahensis","rubea","sierrae","actia","insularis","ammophila","leucansiptila","occidentalis","adusta","alpestris","arcticola","enertera","hoyti","aphrasta"))
+length(table(vouchers$infraspecific))
+back_light_df<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_PavoColorData_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)
+back_light_df<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_PavoColorData_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)
+write.csv(back_light_df,file="~/HornedLarkCamouflage/Data/HOLA_PavoColorData_v1.csv")
+back_light_df<-read.csv("~/HornedLarkCamouflage/Data/HOLA_PavoColorData_v1.csv",stringsAsFactors=F,row.names=1)
+pattern<-read.xlsx2("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BackPattern_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)
+write.csv(pattern,file="~/HornedLarkCamouflage/Data/HOLA_BackPattern_v1.csv")
+pattern<-read.csv("~/HornedLarkCamouflage/Data/HOLA_BackPattern_v1.csv",stringsAsFactors=F,row.names=1)
+pattern<-read.csv("~/HornedLarkCamouflage/Data/HOLA_BackPattern_v1.csv",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(pattern)){#
+	pattern[,i]<-as.numeric(pattern[,i])#
+}
+### Read in FullSpectrumData Set ####
+hola_ir_dorsal<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+hola_ir_ventral<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Ventral_FullSpectrum.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+#
+### Read in abiotic data ####
+bio_data<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BioClim_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)#
+for(i in 1:ncol(bio_data)){#
+	bio_data[,i]<-as.numeric(bio_data[,i])#
+}
+write.csv(hola_ir_dorsal,"/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.csv)
+write.csv(hola_ir_dorsal,"/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.csv")
+write.csv(hola_ir_dorsal,"/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.csv")
+write.csv(hola_ir_dorsal,"/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_Dorsal_FullSpectrum.csv")
+write.csv(hola_ir_dorsal,"~/HornedLarkCamouflage/Data/HOLA_Dorsal_FullSpectrum.csv")
+hola_ir_dorsal<-read.csv("~/HornedLarkCamouflage/Data/HOLA_Dorsal_FullSpectrum.csv", stringsAsFactors=F,row.names=1)
+write.csv(hola_ir_ventral,"~/HornedLarkCamouflage/Data/HOLA_Ventral_FullSpectrum.csv")
+hola_ir_dorsal <-read.csv("~/HornedLarkCamouflage/Data/HOLA_Dorsal_FullSpectrum.csv", stringsAsFactors=F,row.names=1)
+hola_ir_ventral <-read.csv("~/HornedLarkCamouflage/Data/HOLA_Ventral_FullSpectrum.csv", stringsAsFactors=F,row.names=1)
+bio_data<-read.xlsx2("~/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_BioClim_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)
+write.csv(bio_data,"~/HornedLarkCamouflage/Data/HOLA_BioClim_v1.csv")
+bio_data<-read.csv("~/HornedLarkCamouflage/Data/HOLA_BioClim_v1.csv", stringsAsFactors=F,row.names=1)
+for(i in 1:ncol(bio_data)){#
+	bio_data[,i]<-as.numeric(bio_data[,i])#
+}
+bio_pca<-princomp(bio_data)#
+bio_pca$scores[,1]<-bio_pca$scores[,1]*-1#
+bio_pca$loadings
+colnames(vouchers)
+soil_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilComposition_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)
+write.csv(soil_df,"~/HornedLarkCamouflage/Data/HOLA_SoilComposition_v1.csv")
+soil_df<-read.csv("~/HornedLarkCamouflage/Data/HOLA_SoilComposition_v1.csv")
+soil_pca<-princomp(soil_df)
+soil_pca$loadings
+soil_df<-read.csv("~/HornedLarkCamouflage/Data/HOLA_SoilComposition_v1.csv", stringsAsFactors=F,row.names=1)
+soil_pca<-princomp(soil_df)
+soil_pca$loadings
+soil_col_df<-read.xlsx("/Users/NickMason/Desktop/Manuscripts/LarkPhenoEnv/Manuscript/Appendices/HOLA_SoilColor_v1.xlsx",sheetName="Sheet1",stringsAsFactors=F,row.names=1)
+write.csv(soil_col_df,"~/HornedLarkCamouflage/Data/HOLA_SoilColor_v1.csv")
+read.csv("~/HornedLarkCamouflage/Data/HOLA_SoilColor_v1.csv",stringsAsFactors=F,row.names=1)
+soil_col_pca<-princomp(na.omit(soil_col_df[,1:3]))
+nrow(soil_col_pca$scores)
+soil_color_rgb<-apply(na.omit(soil_col_df),1,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))

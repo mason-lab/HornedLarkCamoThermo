@@ -1,0 +1,28 @@
+
+Call:
+glm(formula = dorsal_solar_reflectance ~ soilbright + season + 
+    precip + temp + sex, data = dorsal_glm_df, na.action = "na.fail")
+
+Deviance Residuals: 
+      Min         1Q     Median         3Q        Max  
+-0.166492  -0.068687   0.002238   0.058093   0.154904  
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 3.395e-01  6.820e-03  49.784  < 2e-16 ***
+soilbright  1.482e-04  1.770e-04   0.837    0.403    
+season      2.136e-05  3.203e-06   6.668 2.08e-10 ***
+precip      8.490e-05  1.886e-05   4.502 1.09e-05 ***
+temp        4.846e-05  4.551e-05   1.065    0.288    
+sexmale     1.152e-03  9.530e-03   0.121    0.904    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for gaussian family taken to be 0.005099723)
+
+    Null deviance: 1.6832  on 224  degrees of freedom
+Residual deviance: 1.1168  on 219  degrees of freedom
+AIC: -541.24
+
+Number of Fisher Scoring iterations: 2
+
