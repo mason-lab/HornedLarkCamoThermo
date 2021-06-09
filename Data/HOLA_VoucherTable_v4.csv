@@ -1,0 +1,271 @@
+"","infraspecificepithet","catalognumber","sex","year","month","day","country","stateprovince","verbatimlocality","decimallongitude","decimallatitude"
+"1","arcticola",158332,"male",1960,5,22,"United States","Alaska","9 mi ESE Cape Thompson",-165.577797,68.086733
+"2","arcticola",158334,"female",1960,5,29,"United States","Alaska","9 mi ESE Cape Thompson",-165.577797,68.086733
+"3","arcticola",158335,"male",1960,5,29,"United States","Alaska","9 mi ESE Cape Thompson",-165.577797,68.086733
+"4","arcticola",158337,"female",1960,5,29,"United States","Alaska","9 mi ESE Cape Thompson",-165.577797,68.086733
+"5","arcticola",158333,"male",1961,5,28,"United States","Alaska","6 mi ESE Cape Thompson",-165.7666667,68.1
+"6","adusta",10234,"male",1896,5,24,"United States","Arizona","Huachuca Mts.",-110.4075,31.4889
+"7","adusta",10235,"female",1896,6,30,"United States","Arizona","Huachuca Mts.",-110.4075,31.4889
+"8","adusta",24483,"male",1913,10,5,"United States","Arizona","Fort Huachuca",-110.3467,31.5527
+"9","adusta",5433,"male",1885,2,3,"United States","Arizona","Fort Huachuca",-110.3467,31.5527
+"10","adusta",5434,"male",1885,2,11,"United States","Arizona","Fort Huachuca",-110.3467,31.5527
+"11","adusta",5435,"female",1885,2,3,"United States","Arizona","Fort Huachuca",-110.3467,31.5527
+"12","adusta",5436,"female",1885,2,3,"United States","Arizona","Fort Huachuca",-110.3467,31.5527
+"13","adusta",78852,"male",1894,5,24,"United States","Arizona","Willcox",-109.8314,32.2528
+"14","occidentalis",67284,"female",1934,6,8,"United States","Arizona","Big Lake, 20 mi S Springerville",-109.4133,33.8889
+"15","occidentalis",67286,"female",1934,6,8,"United States","Arizona","Big Lake, 20 mi S Springerville",-109.4133,33.8889
+"16","occidentalis",87783,"male",1942,6,12,"United States","Arizona","U.S. Highway 89, house Rock Ranch, house Rock Valley",-111.9553,36.7177
+"17","occidentalis",87784,"male",1942,6,12,"United States","Arizona","U.S. Highway 89, house Rock Ranch, house Rock Valley",-111.9553,36.7177
+"18","occidentalis",87785,"male",1942,6,12,"United States","Arizona","U.S. Highway 89, house Rock Ranch, house Rock Valley",-111.9553,36.7177
+"19","occidentalis",87786,"male",1942,6,12,"United States","Arizona","U.S. Highway 89, house Rock Ranch, house Rock Valley",-111.9553,36.7177
+"20","occidentalis",87788,"female",1942,6,12,"United States","Arizona","U.S. Highway 89, house Rock Ranch, house Rock Valley",-111.9553,36.7177
+"21","enertera",59518,"male",1931,1,9,"Mexico","Baja California","San Augustin",-114.96888,29.92155
+"22","enertera",59563,"female",1931,6,3,"Mexico","Baja California Sur","Magdalena, Santa Magdalena Id.",-112.2216667,24.908889
+"23","enertera",59534,"female",1931,5,13,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"24","enertera",59535,"male",1931,5,13,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"25","enertera",59538,"female",1931,5,13,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"26","enertera",59539,"female",1931,5,13,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"27","enertera",59541,"male",1931,5,13,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"28","enertera",59542,"male",1931,5,14,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"29","enertera",59543,"female",1931,5,14,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"30","enertera",59545,"female",1931,5,14,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"31","enertera",59552,"male",1931,5,14,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"32","enertera",59558,"male",1931,5,15,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"33","enertera",59559,"male",1931,5,15,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"34","enertera",59560,"female",1931,5,15,"Mexico","Baja California Sur","Hiray, Llano de Hiray",-111.9375,25.343611
+"35","arcticola",102623,"male",1888,4,17,"Canada","British Columbia","Chilliwack",-121.9417,49.175
+"36","arcticola",102618,"female",1919,8,28,"Canada","British Columbia","Pearson Mt., Headwaters Keremeos Cr.",-119.775556,49.178611
+"37","arcticola",102612,"female",1925,10,14,"Canada","British Columbia","Vancouver Island, Comox",-124.9333,49.6833
+"38","arcticola",102614,"female",1925,12,17,"Canada","British Columbia","Vancouver Island, Comox",-124.9333,49.6833
+"39","arcticola",102604,"male",1930,3,30,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"40","arcticola",102608,"male",1929,9,7,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"41","arcticola",102610,"female",1929,9,25,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"42","arcticola",42658,"female",1921,10,4,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"43","arcticola",42659,"female",1921,10,4,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"44","arcticola",82368,"female",1913,9,30,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"45","arcticola",102600,"female",1920,5,15,"Canada","British Columbia","Masset, Graham Island, Queen Charlotte Islands",-132.15,54.0167
+"46","arcticola",102601,"male",1920,5,15,"Canada","British Columbia","Masset, Graham Island, Queen Charlotte Islands",-132.15,54.0167
+"47","arcticola",102593,"male",1924,6,19,"Canada","British Columbia","Atlin",-133.7,59.5667
+"48","arcticola",102594,"male",1924,7,8,"Canada","British Columbia","Atlin",-133.7,59.5667
+"49","arcticola",102596,"female",1924,8,7,"Canada","British Columbia","Atlin",-133.7,59.5667
+"50","hoyti",82371,"male",1922,3,14,"Canada","British Columbia","Okanagan Landing",-119.35,50.2333
+"51","actia",3667,"male",1908,5,26,"United States","California","Chula Vista",-117.083,32.64
+"52","actia",3471,"female",1908,4,6,"United States","California","Nat'l City",-117.1085538,32.6746983
+"53","actia",3472,"female",1908,4,6,"United States","California","Nat'l City",-117.1085538,32.6746983
+"54","actia",3473,"female",1908,4,6,"United States","California","Nat'l City",-117.1085538,32.6746983
+"55","actia",3479,"male",1908,4,10,"United States","California","False Bay",-117.267444,32.807573
+"56","actia",19488,"male",1911,4,30,"United States","California","Earlimart",-119.271428,35.882291
+"57","actia",19496,"female",1911,5,3,"United States","California","Earlimart",-119.271428,35.882291
+"58","actia",19486,"male",1911,4,24,"United States","California","Tipton",-119.31074,36.059519
+"59","actia",19487,"female",1911,4,24,"United States","California","Tipton",-119.31074,36.059519
+"60","actia",29155,"female",1918,6,27,"United States","California","""""""Hayes Station"""", 19 mi SW Mendota""",-120.6105,36.6759
+"61","actia",64599,"female",1934,3,19,"United States","California","2 mi SW Friant",-119.727713,36.96526
+"62","actia",90619,"male",1941,5,19,"United States","California","Santa Cruz",-122.0068146,36.9746516
+"63","actia",120329,"female",1947,3,7,"United States","California","Santa Cruz",-122.0197285,36.9861399
+"64","actia",120330,"male",1947,3,7,"United States","California","Santa Cruz",-122.0197285,36.9861399
+"65","actia",19481,"male",1911,3,21,"United States","California","Los Banos",-120.84778,37.060514
+"66","actia",19482,"female",1911,3,23,"United States","California","Los Banos",-120.84778,37.060514
+"67","actia",19483,"male",1911,3,23,"United States","California","Los Banos",-120.84778,37.060514
+"68","actia",19484,"male",1911,3,23,"United States","California","Los Banos",-120.84778,37.060514
+"69","actia",116808,"male",1897,3,22,"United States","California","San Jose",-121.89,37.3241
+"70","actia",116809,"female",1897,3,22,"United States","California","San Jose",-121.89,37.3241
+"71","ammophila",140817,"female",1960,4,12,"United States","California","Pinto Basin",-115.6895421,33.9355317
+"72","ammophila",24550,"male",1914,3,20,"United States","California","Victorville, Mohave River",-117.29028,34.53611
+"73","ammophila",29166,"male",1918,3,14,"United States","California","Mohvave",-118.17147,35.0529432
+"74","ammophila",29169,"female",1918,3,14,"United States","California","Mohave",-118.17147,35.0529432
+"75","ammophila",29170,"female",1918,3,14,"United States","California","Mohave",-118.17147,35.0529432
+"76","ammophila",29172,"male",1918,3,15,"United States","California","Mohave",-118.17147,35.0529432
+"77","ammophila",29173,"male",1918,3,15,"United States","California","Mohave",-118.17147,35.0529432
+"78","ammophila",29177,"female",1918,3,15,"United States","California","Mojave",-118.1714749,35.0529432
+"79","ammophila",82393,"female",1923,4,23,"United States","California","Taft",-119.4562744,35.1423263
+"80","ammophila",82394,"male",1923,4,24,"United States","California","Taft",-119.4559021,35.1461198
+"81","ammophila",102726,"female",1923,5,6,"United States","California","Buena Vista Lake",-119.286876,35.1881396
+"82","ammophila",102727,"male",1923,4,29,"United States","California","Buena Vista Lake",-119.29954,35.1939609
+"83","ammophila",19502,"female",1911,5,23,"United States","California","7 mi SE Simmler, Carrizo Plains",-119.90177,35.27897
+"84","ammophila",29153,"male",1918,4,17,"United States","California","2 mi N Edison Station",-118.8776301,35.374779
+"85","ammophila",22501,"male",1912,4,28,"United States","California","Keeler",-117.870011,36.489166
+"86","ammophila",22502,"female",1912,4,28,"United States","California","Keeler",-117.870011,36.489166
+"87","insularis",177000,"male",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"88","insularis",177001,"male",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"89","insularis",177002,"female",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"90","insularis",177003,"female",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"91","insularis",177004,"male",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"92","insularis",177005,"male",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"93","insularis",177006,"female",1995,4,13,"United States","California","Santa Catalina Id., 1.25 mi N Little Harbor",-118.477077,33.403102
+"94","insularis",176999,"female",1995,4,14,"United States","California","Santa Catalina Id., 2.5 mi N Little Harbor",-118.478107,33.42001
+"95","insularis",177009,"male",1995,4,14,"United States","California","W end Santa Catalina Id., 1 mi S and 2 mi E Silver Pk.",-118.533067,33.445346
+"96","insularis",177010,"female",1995,4,14,"United States","California","W end Santa Catalina Id., 1 mi S and 2 mi E Silver Pk.",-118.533067,33.445346
+"97","insularis",174005,"male",1994,4,30,"United States","California","W end Santa Cruz Id., Canada de Los Sauces",-119.8479954,34.0076468
+"98","insularis",174006,"male",1994,4,30,"United States","California","W end Santa Cruz Id., Canada de Los Sauces",-119.8479954,34.0076468
+"99","insularis",58402,"female",1931,5,23,"United States","California","S slope Mt.Diablo, Santa Cruz Island",-119.7833422,34.0261119
+"100","insularis",120124,"female",1950,3,7,"United States","California","Forney Cove, Santa Cruz Id.",-119.9177727,34.0586484
+"101","insularis",120125,"male",1950,3,7,"United States","California","Forney Cove, Santa Cruz Id.",-119.9177727,34.0586484
+"102","insularis",120127,"male",1950,3,7,"United States","California","Forney Cove, Santa Cruz Id.",-119.9177727,34.0586484
+"103","insularis",120131,"female",1950,3,8,"United States","California","Forney Cove, Santa Cruz Id.",-119.9177727,34.0586484
+"104","insularis",120132,"female",1950,3,8,"United States","California","Forney Cove, Santa Cruz Id.",-119.9177727,34.0586484
+"105","insularis",120133,"female",1950,3,8,"United States","California","Forney Cove, Santa Cruz Id.",-119.9177727,34.0586484
+"106","insularis",174004,"male",1994,4,30,"United States","California","W end Santa Cruz Id., Canada de Los Sauces",-119.907439,34.065823
+"107","lamprochroma",132294,"female",1954,5,31,"United States","California","Cabin Creek, White Mts.",-118.261045,37.712773
+"108","lamprochroma",132295,"male",1954,6,2,"United States","California","Cabin Creek, White Mts.",-118.261045,37.712773
+"109","leucansiptila",8090,"female",1909,3,30,"United States","California","Coyote Well",-115.9668,32.7352
+"110","leucansiptila",102733,"female",1916,3,21,"United States","California","near Sand Dunes",-115.223644,33.058513
+"111","leucansiptila",102734,"female",1916,3,21,"United States","California","near Sand Dunes",-115.223644,33.058513
+"112","leucansiptila",1066,"female",1908,4,28,"United States","California","Mecca",-116.0727189,33.5719174
+"113","leucansiptila",854,"male",1908,4,15,"United States","California","Mecca",-116.0727189,33.5719174
+"114","leucansiptila",961,"male",1908,4,17,"United States","California","Mecca",-116.0727189,33.5719174
+"115","leucansiptila",852,"male",1908,4,10,"United States","California","Mecca",-116.0667529,33.5727746
+"116","leucansiptila",853,"male",1908,4,15,"United States","California","Mecca",-116.0667529,33.5727746
+"117","leucansiptila",855,"male",1908,4,15,"United States","California","Mecca",-116.0667529,33.5727746
+"118","leucansiptila",966,"female",1908,4,24,"United States","California","Mecca",-116.0667529,33.5727746
+"119","leucansiptila",74252,"female",1938,5,27,"United States","California","Providence Mts., head of Cedar Canyon",-115.39825,35.17621
+"120","leucansiptila",74253,"female",1938,5,27,"United States","California","Providence Mts., head of Cedar Canyon",-115.39825,35.17621
+"121","leucansiptila",74254,"female",1938,5,27,"United States","California","Providence Mts., head of Cedar Canyon",-115.39825,35.17621
+"122","leucansiptila",74255,"male",1938,5,27,"United States","California","Providence Mts., head of Cedar Canyon",-115.39825,35.17621
+"123","leucansiptila",74457,"male",1938,5,27,"United States","California","Providence Mts., head of Cedar Canyon",-115.39825,35.17621
+"124","leucansiptila",74245,"male",1938,5,14,"United States","California","1 mi E Cima",-115.4806422,35.2377787
+"125","leucansiptila",74248,"male",1938,5,16,"United States","California","3/4 mi E Cima",-115.4850642,35.2377793
+"126","leucansiptila",74249,"male",1938,5,16,"United States","California","3/4 mi E Cima",-115.4850642,35.2377793
+"127","leucansiptila",74244,"female",1938,5,12,"United States","California","Cima",-115.49833,35.23778
+"128","leucansiptila",74251,"female",1938,5,18,"United States","California","2 mi NNE Cima",-115.4977,35.2652
+"129","merrilli",163234,"male",1972,3,30,"United States","California","Gazelle 2 mi NW, Cleland Ranch",-122.5459913,41.5422341
+"130","merrilli",163237,"male",1972,3,30,"United States","California","Gazelle 2 mi NW, Cleland Ranch",-122.5459913,41.5422341
+"131","merrilli",163239,"female",1972,3,30,"United States","California","Gazelle 2 mi NW, Cleland Ranch",-122.5459913,41.5422341
+"132","merrilli",163242,"male",1972,3,30,"United States","California","Gazelle 2 mi NW, Cleland Ranch",-122.5459913,41.5422341
+"133","merrilli",163243,"male",1972,3,30,"United States","California","Gazelle 2 mi NW, Cleland Ranch",-122.5459913,41.5422341
+"134","merrilli",163247,"female",1972,3,29,"United States","California","Yreka 1 1/2 mi E and 4 mi S, Brazie Ranch, Killgore Hills Rd.",-122.61153,41.6727
+"135","merrilli",163249,"male",1972,3,29,"United States","California","Yreka 1 1/2 mi E and 4 mi S, Brazie Ranch, Killgore Hills Rd.",-122.61153,41.6727
+"136","merrilli",163250,"female",1972,3,29,"United States","California","Yreka 1 1/2 mi E and 4 mi S, Brazie Ranch, Killgore Hills Rd.",-122.61153,41.6727
+"137","merrilli",163251,"female",1972,3,29,"United States","California","Yreka 1 1/2 mi E and 4 mi S, Brazie Ranch, Killgore Hills Rd.",-122.61153,41.6727
+"138","merrilli",163254,"female",1972,3,29,"United States","California","Yreka 1 1/2 mi E and 4 mi S, Brazie Ranch, Killgore Hills Rd.",-122.61153,41.6727
+"139","merrilli",163175,"male",1971,4,1,"United States","California","Montague 1 mi NW, Airport Field, Shasta View Ranch",-122.5450175,41.7306941
+"140","merrilli",163176,"female",1971,4,1,"United States","California","Montague 1 mi NW, Airport Field, Shasta View Ranch",-122.5450175,41.7306941
+"141","merrilli",163177,"male",1971,4,1,"United States","California","Montague 1 mi NW, Airport Field, Shasta View Ranch",-122.5450175,41.7306941
+"142","merrilli",163179,"female",1971,4,2,"United States","California","Montague 1 mi NW, Airport Field, Shasta View Ranch",-122.5450175,41.7306941
+"143","merrilli",163180,"male",1971,4,2,"United States","California","Montague 1 mi NW, Airport Field, Shasta View Ranch",-122.5450175,41.7306941
+"144","merrilli",163216,"male",1972,3,26,"United States","California","Montague 1 mi NW, Shasta View Ranch",-122.5401478,41.7374149
+"145","merrilli",163217,"female",1972,3,26,"United States","California","Montague 1 mi NW, Shasta View Ranch",-122.5401478,41.7374149
+"146","merrilli",163218,"female",1972,3,26,"United States","California","Montague 1 mi NW, Shasta View Ranch",-122.5401478,41.7374149
+"147","merrilli",163219,"male",1972,3,26,"United States","California","Montague 1 mi NW, Shasta View Ranch",-122.5401478,41.7374149
+"148","merrilli",163220,"female",1972,3,26,"United States","California","Montague 1 mi NW, Shasta View Ranch",-122.5401478,41.7374149
+"149","rubea",22710,"female",1912,4,9,"United States","California","Marysville Buttes, 4 mi NW Sutter",-121.8013333,39.201
+"150","rubea",22711,"female",1912,4,9,"United States","California","Marysville Buttes, 4 mi NW Sutter",-121.8013333,39.201
+"151","rubea",22714,"male",1912,4,9,"United States","California","Marysville Buttes, 4 mi NW Sutter",-121.8013333,39.201
+"152","rubea",22707,"male",1912,4,5,"United States","California","Marysville Buttes, 8 mi NW Sutter",-121.85602,39.2389
+"153","rubea",22708,"male",1912,4,4,"United States","California","Marysville Buttes, 8 mi NW Sutter",-121.85602,39.2389
+"154","rubea",22709,"female",1912,4,4,"United States","California","Marysville Buttes, 8 mi NW Sutter",-121.85602,39.2389
+"155","rubea",22719,"female",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"156","rubea",22720,"male",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"157","rubea",22721,"female",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"158","rubea",22722,"male",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"159","rubea",22724,"male",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"160","rubea",22727,"female",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"161","rubea",22729,"female",1912,5,28,"United States","California","Chambers Ravine, 4 mi N Oroville",-121.55535,39.57029
+"162","rubea",64579,"female",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"163","rubea",64581,"male",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"164","rubea",64583,"male",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"165","rubea",64587,"male",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"166","rubea",64590,"female",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"167","rubea",64592,"male",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"168","rubea",64593,"female",1934,3,3,"United States","California","Dry Creek, 10 mi NE Oroville",-121.560391,39.581578
+"169","sierrae",165405,"female",1977,7,12,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"170","sierrae",165406,"male",1977,7,12,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"171","sierrae",165408,"female",1977,7,12,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"172","sierrae",165409,"female",1977,7,12,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"173","sierrae",165410,"male",1977,7,12,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"174","sierrae",165411,"male",1977,7,12,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"175","sierrae",165415,"male",1977,7,13,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"176","sierrae",165416,"female",1977,7,13,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"177","sierrae",165417,"female",1977,7,13,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"178","sierrae",165419,"male",1977,7,13,"United States","California","Kyburz Flat",-120.2364196,39.5021194
+"179","sierrae",162699,"male",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"180","sierrae",162700,"female",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"181","sierrae",162701,"female",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"182","sierrae",162702,"male",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"183","sierrae",162703,"male",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"184","sierrae",162704,"female",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"185","sierrae",162708,"male",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"186","sierrae",162711,"female",1971,6,18,"United States","California","8 1/2 mi E Mt.Ingalls, SW Corner of McReynolds Valley",-120.46,39.97
+"187","sierrae",166913,"male",1979,7,10,"United States","California","McReynolds Valley, SW Corner",-120.4592777,39.9855795
+"188","sierrae",166915,"female",1979,7,10,"United States","California","McReynolds Valley, SW Corner",-120.4592777,39.9855795
+"189","aphrasta",152933,"male",1964,5,2,"Mexico","Chihuahua","Ojo Laguna",-106.3304805555,29.4621811111
+"190","aphrasta",152934,"female",1964,5,2,"Mexico","Chihuahua","Ojo Laguna",-106.3304805555,29.4621811111
+"191","aphrasta",143776,"male",1961,9,2,"Mexico","Chihuahua","Ojo de Laguna, 25 mi S Gallego",-106.401684,29.480204
+"192","aphrasta",139540,"female",1959,6,21,"Mexico","Chihuahua","Sierra del Nido, Canon del Alamo",-106.770421,29.485097
+"193","aphrasta",139544,"male",1959,6,21,"Mexico","Chihuahua","Sierra del Nido, Canon del Alamo",-106.770421,29.485097
+"194","aphrasta",139545,"male",1959,6,21,"Mexico","Chihuahua","Sierra del Nido, Canon del Alamo",-106.770421,29.485097
+"195","aphrasta",139546,"female",1959,6,21,"Mexico","Chihuahua","Sierra del Nido, Canon del Alamo",-106.770421,29.485097
+"196","occidentalis",149571,"female",1963,3,12,"Mexico","Chihuahua","Ojo Laguna",-106.3304805555,29.4621811111
+"197","occidentalis",149572,"male",1963,3,28,"Mexico","Chihuahua","Ojo Laguna",-106.3304805555,29.4621811111
+"198","utahensis",134099,"male",1956,4,12,"United States","Idaho","N of Elba",-113.5606,42.2483
+"199","utahensis",67608,"female",1934,6,3,"United States","Idaho","10 mi N Riddle",-116.1094,42.3318
+"200","utahensis",67701,"male",1934,6,14,"United States","Idaho","3.5 mi S Decko",-113.6272,42.4676
+"201","utahensis",134098,"male",1956,4,11,"United States","Idaho","10 mi N Rupert",-113.6764,42.764
+"202","utahensis",69181,"female",1936,7,25,"United States","Idaho","Pahsimeroi Valley, 10 mi S Goldburg",-113.645,44.2407
+"203","utahensis",69184,"female",1936,7,25,"United States","Idaho","Pahsimeroi Valley, 10 mi S Goldburg",-113.645,44.2407
+"204","utahensis",69178,"female",1936,7,22,"United States","Idaho","Pahsimeroi Valley, 6 mi S Goldburg",-113.645,44.2987
+"205","hoyti",73374,"male",1936,6,23,"Canada","Manitoba","Churchill",-94.16528,58.76944
+"206","alpestris",63384,"female",1875,3,27,"United States","Massachusetts","Swampscott",-70.91,42.47
+"207","alpestris",63386,"female",1878,3,16,"United States","Massachusetts","Swampscott",-70.91,42.47
+"208","ammophila",162726,"male",1971,5,22,"United States","Nevada","Send Sarcobatus Flat, 7 mi W, 2 mi S Springdale",-116.88078,37.001
+"209","ammophila",162727,"male",1971,5,22,"United States","Nevada","Send Sarcobatus Flat, 7 mi W, 2 mi S Springdale",-116.88078,37.001
+"210","ammophila",162729,"female",1971,5,22,"United States","Nevada","Send Sarcobatus Flat, 7 mi W, 2 mi S Springdale",-116.88078,37.001
+"211","ammophila",162730,"female",1971,5,22,"United States","Nevada","Send Sarcobatus Flat, 7 mi W, 2 mi S Springdale",-116.88078,37.001
+"212","lamprochroma",165717,"female",1978,6,21,"United States","Nevada","Clayton Valley, 7 mi S and 2 mi W Silver Pk.",-117.59,37.74361
+"213","lamprochroma",165718,"female",1978,6,21,"United States","Nevada","Clayton Valley, 7 mi S and 2 mi W Silver Pk.",-117.59,37.74361
+"214","lamprochroma",165720,"male",1978,6,21,"United States","Nevada","Clayton Valley, 7 mi S and 2 mi W Silver Pk.",-117.59,37.74361
+"215","lamprochroma",165729,"male",1978,6,22,"United States","Nevada","Clayton Valley, 7 mi S and 2 mi W Silver Pk.",-117.59,37.74361
+"216","lamprochroma",165730,"female",1978,6,22,"United States","Nevada","Clayton Valley, 7 mi S and 2 mi W Silver Pk.",-117.59,37.74361
+"217","lamprochroma",165396,"female",1977,6,28,"United States","Nevada","Bald Mt. N slope",-119.115,38.5344
+"218","lamprochroma",165398,"male",1977,6,29,"United States","Nevada","Bald Mt. N slope",-119.115,38.5344
+"219","lamprochroma",165400,"female",1977,6,29,"United States","Nevada","Bald Mt. N slope",-119.115,38.5344
+"220","lamprochroma",165401,"female",1977,6,29,"United States","Nevada","Bald Mt. N slope",-119.115,38.5344
+"221","lamprochroma",165402,"male",1977,6,29,"United States","Nevada","Bald Mt. N slope",-119.115,38.5344
+"222","lamprochroma",162686,"male",1971,6,7,"United States","Nevada","5.5 mi S and 6 mi E Wellington",-119.26391,38.67665
+"223","lamprochroma",162687,"female",1971,6,7,"United States","Nevada","5.5 mi S and 6 mi E Wellington",-119.26391,38.67665
+"224","lamprochroma",162689,"male",1971,6,7,"United States","Nevada","5.5 mi S and 6 mi E Wellington",-119.26391,38.67665
+"225","lamprochroma",162691,"male",1971,6,8,"United States","Nevada","2 mi N Lobdell summit, Pine Grove Hills",-119.16972,38.68011
+"226","lamprochroma",180084,"male",2002,5,30,"United States","Nevada","4 mi N and 2 mi E Poodle Mtn., 6000 ft., Buffalo Hills, Washoe Co., Nev.",-119.61681667,40.876216667
+"227","lamprochroma",180088,"male",2002,5,30,"United States","Nevada","4 mi N and 2 mi E Poodle Mtn., 6000 ft., Buffalo Hills, Washoe Co., Nev.",-119.61681667,40.876216667
+"228","lamprochroma",180089,"female",2002,5,30,"United States","Nevada","4 mi N and 2 mi E Poodle Mtn., 6000 ft., Buffalo Hills, Washoe Co., Nev.",-119.61681667,40.876216667
+"229","lamprochroma",180090,"female",2002,5,30,"United States","Nevada","4 mi N and 2 mi E Poodle Mtn., 6000 ft., Buffalo Hills, Washoe Co., Nev.",-119.61681667,40.876216667
+"230","utahensis",57430,"female",1930,4,22,"United States","Nevada","5 mi SE Millett P.O.",-117.1143,38.96403
+"231","utahensis",57431,"male",1930,4,22,"United States","Nevada","5 mi SE Millett P.O.",-117.1143,38.96403
+"232","utahensis",57432,"female",1930,4,23,"United States","Nevada","5 mi SE Millett P.O.",-117.1143,38.96403
+"233","utahensis",57441,"male",1930,5,13,"United States","Nevada","5 mi SE Millett P.O.",-117.1143,38.96403
+"234","utahensis",64678,"female",1934,5,19,"United States","Nevada","on Lincoln Hwy., 15 mi SE Eureka",-115.641507,39.347272
+"235","utahensis",133192,"female",1955,6,11,"United States","Nevada","9 mi E Jarbidge Pk.",-115.21645,41.84056
+"236","utahensis",134250,"male",1956,6,5,"United States","Nevada","4 mi N Jarbidge",-115.43111,41.93157
+"237","occidentalis",82390,"male",1928,3,8,"United States","New Mexico","Saccatone Cr.",-108.7015275,33.1545903
+"238","adusta",58954,"female",1931,8,30,"United States","New Mexico","Horse Camp, Victoria Cattle Co., Animas Valley",-108.870797,31.6121586
+"239","occidentalis",71116,"male",1937,3,16,"United States","New Mexico","1 mi S Santa Fe",-105.9370634,35.6724372
+"240","occidentalis",71117,"male",1937,3,16,"United States","New Mexico","1 mi S Santa Fe",-105.9370634,35.6724372
+"241","occidentalis",71118,"male",1937,3,16,"United States","New Mexico","1 mi S Santa Fe",-105.9370634,35.6724372
+"242","occidentalis",71119,"male",1937,3,16,"United States","New Mexico","1 mi S Santa Fe",-105.9370634,35.6724372
+"243","occidentalis",71120,"female",1937,3,16,"United States","New Mexico","1 mi S Santa Fe",-105.9370634,35.6724372
+"244","occidentalis",71121,"female",1937,3,16,"United States","New Mexico","1 mi S Santa Fe",-105.9370634,35.6724372
+"245","occidentalis",82391,"female",1933,5,6,"United States","New Mexico","Animas R.",-107.992233,36.822224
+"246","strigata",46853,"male",1926,3,5,"United States","Oregon","5 mi N Medford",-122.8744,42.3991
+"247","strigata",160767,"female",1971,8,31,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"248","strigata",160768,"male",1971,8,31,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"249","strigata",160769,"female",1971,8,31,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"250","strigata",160772,"female",1971,9,1,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"251","strigata",160773,"female",1971,9,1,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"252","strigata",160777,"female",1971,9,1,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"253","strigata",164441,"male",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"254","strigata",164443,"male",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"255","strigata",164445,"female",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"256","strigata",164447,"female",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"257","strigata",164450,"male",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"258","strigata",164452,"female",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"259","strigata",164454,"female",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"260","strigata",164457,"female",1976,5,22,"United States","Oregon","Agate Reservoir, 4 mi ESE White City",-122.7717,42.4133
+"261","strigata",46851,"male",1926,1,27,"United States","Oregon","3 mi S Eagle Point",-122.8017,42.4293
+"262","strigata",65511,"male",1934,5,27,"United States","Oregon","8 mi NNE Medford",-122.8147,42.4338
+"263","strigata",65513,"male",1934,5,27,"United States","Oregon","8 mi NNE Medford",-122.8147,42.4338
+"264","strigata",33529,"male",1896,5,27,"United States","Oregon","Salem",-123.0339,44.9431
+"265","utahensis",90359,"male",1942,4,12,"United States","Utah","10 mi W Salt Lake Airport",-112.18187,40.62528
+"266","utahensis",90360,"male",1942,4,12,"United States","Utah","10 mi W Salt Lake Airport",-112.18187,40.62528
+"267","utahensis",90361,"male",1942,4,12,"United States","Utah","10 mi W Salt Lake Airport",-112.18187,40.62528
+"268","utahensis",90362,"male",1942,4,12,"United States","Utah","10 mi W Salt Lake Airport",-112.18187,40.62528
+"269","utahensis",90365,"female",1942,4,18,"United States","Utah","10 mi W Salt Lake Airport",-112.18187,40.62528
+"270","strigata",82381,"male",1921,4,24,"United States","Washington","Tacoma",-122.4431,47.2531
