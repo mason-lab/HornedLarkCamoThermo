@@ -72,6 +72,9 @@ nrow(soil_col_pca$scores)
 
 ### Create RGB Values for plotting ###
 soil_color_rgb<-apply(na.omit(soil_col_df),1,function(x) rgb(x[1],x[2],x[3],maxColorValue=255))
+length(soil_color_rgb)
+
+nrow(vouchers[!rownames(vouchers) %in% names(soil_color_rgb),])
 
 #####################
 ### DATA ANALYSIS ###
