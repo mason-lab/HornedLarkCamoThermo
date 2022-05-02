@@ -17,7 +17,7 @@ from math import log as log
 #-------SCRIPT--------#
 #---------------------#
 #Summarize the data for simulations that incorporated average dorsal absorptance
-files = glob.glob('Output/Endoscape/avg_absorptance/*.csv')
+files = glob.glob('Output/avg_absorptance_*.csv')
 hourly_results = pandas.DataFrame(columns = ['type','species','activity_pattern','site','version','climate_scenario','mass_change','seek_temperature','wind','posture','fiber_density','shade','feather_depths','orientation','shape','physiology_known','mass','surface_area','julian_day','hour','Srad','Rabs','Remi','Tes','Tref','Te_dorsal','Hi_d','Ri_d','Ks','Kf_d','Ksfi_d','Ke_d','Ke_empirical','Ke_theoretical','Tb','Qgen','EHL','MHP','EHL/MHP','energy_balance','water_loss_mass','dehydration_mass','excess_proportion_of_mass_lost','excess_water','metabolic_heat_required','water_loss_required','proportion_water_loss_required','excess_metabolic_heat','Qgen_water_avg','Qgen_water_sum','Qgen_heat_avg','Qgen_heat_sum','activity_thermal_stress','activity_water_stress','water_stress','heat_stress','hr_restriction'])
 for i in range(len(files)):
     temporary = pandas.read_csv(files[i])
@@ -38,7 +38,7 @@ daily_df1['Heating_costs_avg'] = (daily_df1['Qgen_heat_sum']/12.0)/1000.0
 daily_df1.to_csv('Output/lark_avg_abs.csv',index = False)
 
 #Summarize the data for simulations that incorporated observed dorsal absorptance
-files = glob.glob('Output/Endoscape/dorsal_absorptance/*.csv')
+files = glob.glob('Output/dorsal_absorptance*.csv')
 hourly_results = pandas.DataFrame(columns = ['type','species','activity_pattern','site','version','climate_scenario','mass_change','seek_temperature','wind','posture','fiber_density','shade','feather_depths','orientation','shape','physiology_known','mass','surface_area','julian_day','hour','Srad','Rabs','Remi','Tes','Tref','Te_dorsal','Hi_d','Ri_d','Ks','Kf_d','Ksfi_d','Ke_d','Ke_empirical','Ke_theoretical','Tb','Qgen','EHL','MHP','EHL/MHP','energy_balance','water_loss_mass','dehydration_mass','excess_proportion_of_mass_lost','excess_water','metabolic_heat_required','water_loss_required','proportion_water_loss_required','excess_metabolic_heat','Qgen_water_avg','Qgen_water_sum','Qgen_heat_avg','Qgen_heat_sum','activity_thermal_stress','activity_water_stress','water_stress','heat_stress','hr_restriction'])
 for i in range(len(files)):
     temporary = pandas.read_csv(files[i])
